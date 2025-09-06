@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FitBalance — питание, тренировки, профиль</title>
   <meta name="description" content="FitBalance — калькулятор калорий, рекомендации по тренировкам, статистика питания. Поддержка Telegram WebApp." />
+
+  <!-- Fonts & Tailwind -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -15,33 +17,33 @@
         extend: {
           fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
           colors: {
-            brand: {
-              50: '#fff8f1', 100: '#fde9d7', 200: '#f9d2ae', 300: '#f4b781', 400: '#ef9957', 500: '#ea7a2c', 600: '#cd6120', 700: '#a64a19', 800: '#7f3713', 900: '#5e290f'
-            },
             ink: '#0b0f14',
+            gold: {
+              50: '#fff8e6', 100: '#fdebb8', 200: '#f9d979', 300: '#f4c240', 400: '#e9ad1c', 500: '#d4af37', 600: '#b89426', 700: '#8f6f1c', 800: '#6b5216', 900: '#4f3c10'
+            },
           },
           boxShadow: {
-            soft: '0 10px 30px rgba(0,0,0,.12)',
-            glow: '0 0 0 6px rgba(234,122,44,.12)'
+            soft: '0 8px 30px rgba(0,0,0,.22)',
+            glow: '0 0 0 6px rgba(212,175,55,.14)'
           },
-          animation: {
-            fade: 'fade .4s ease both',
-          },
-          keyframes: {
-            fade: { '0%': { opacity: 0, transform: 'translateY(4px)' }, '100%': { opacity: 1, transform: 'none' } }
-          }
+          animation: { fade: 'fade .35s ease both' },
+          keyframes: { fade: { '0%': { opacity: 0, transform: 'translateY(4px)' }, '100%': { opacity: 1, transform: 'none' } } }
         }
       }
     }
   </script>
+
   <style>
     :root { color-scheme: light dark; }
-    html, body { height: 100%; background: radial-gradient(1200px 600px at 10% -10%, #fef3e7, transparent), radial-gradient(900px 500px at 90% -20%, #ffe8d6, transparent), #0b0f14; }
-    .glass { backdrop-filter: blur(10px); background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03)); border: 1px solid rgba(255,255,255,.12); }
-    .elev { box-shadow: 0 15px 40px rgba(0,0,0,.25); }
-    .tab-active { color: white; }
+    html, body { height: 100%; background: radial-gradient(1200px 600px at 10% -10%, rgba(212,175,55,0.06), transparent), radial-gradient(900px 500px at 90% -20%, rgba(212,175,55,0.04), transparent), #0b0f14; }
+    .glass { -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); border: 1px solid rgba(255,255,255,.12); }
+    .elev { box-shadow: 0 18px 50px rgba(0,0,0,.28); }
+    .tab-active { color: #fff; background: linear-gradient(180deg, rgba(212,175,55,.12), rgba(212,175,55,.06)); }
     .hide { display: none; }
+    .field { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12); }
+    .field:focus { outline: none; box-shadow: 0 0 0 3px rgba(212,175,55,.18); border-color: rgba(212,175,55,.35); }
   </style>
+
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body class="font-sans text-white/90 antialiased">
@@ -49,14 +51,14 @@
   <header class="max-w-6xl mx-auto px-4 pt-6">
     <div class="glass elev rounded-2xl p-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="size-10 rounded-xl bg-brand-500 grid place-items-center shadow-glow">
+        <div class="size-10 rounded-xl bg-gold-600 grid place-items-center shadow-glow" aria-hidden="true">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M7 4h10a2 2 0 0 1 2 2v3a7 7 0 1 1-14 0V6a2 2 0 0 1 2-2Z" stroke="#fff" stroke-width="1.5"/>
             <path d="M9 18h6" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
         </div>
         <div>
-          <div class="text-lg font-semibold">FitBalance</div>
+          <div class="text-lg font-semibold tracking-tight">FitBalance</div>
           <div class="text-xs text-white/60" id="hello">Здравствуйте</div>
         </div>
       </div>
@@ -64,13 +66,13 @@
     </div>
   </header>
 
-  <!-- Main cards -->
+  <!-- Main -->
   <main class="max-w-6xl mx-auto px-4 py-6 grid gap-6">
     <!-- Energy card -->
     <section class="glass elev rounded-2xl p-5 animate-fade" id="energyCard">
       <div class="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h2 class="text-xl font-semibold mb-1">Сегодняшний баланс</h2>
+          <h1 class="text-xl font-semibold mb-1 tracking-tight">Сегодняшний баланс</h1>
           <p class="text-sm text-white/70">Калории за день и лимит по цели.</p>
         </div>
         <div class="text-right">
@@ -94,49 +96,62 @@
       </div>
     </section>
 
-    <!-- Tabs content -->
+    <!-- Tabs container -->
     <section class="glass elev rounded-2xl overflow-hidden animate-fade">
-      <!-- Tabs -->
       <nav class="grid grid-cols-3 bg-white/5">
-        <button class="tab-btn py-3 text-center font-medium tab-active" data-tab="food">График питания</button>
-        <button class="tab-btn py-3 text-center font-medium" data-tab="workouts">График тренировок</button>
-        <button class="tab-btn py-3 text-center font-medium" data-tab="profile">Профиль</button>
+        <button class="tab-btn py-3 text-center font-medium tab-active" data-tab="food" aria-label="Питание">График питания</button>
+        <button class="tab-btn py-3 text-center font-medium" data-tab="workouts" aria-label="Тренировки">График тренировок</button>
+        <button class="tab-btn py-3 text-center font-medium" data-tab="profile" aria-label="Профиль">Профиль</button>
       </nav>
 
       <!-- Food tab -->
       <div id="tab-food" class="p-5 grid gap-5">
         <div class="grid md:grid-cols-[1.2fr_.8fr] gap-4">
+          <!-- Add product -->
           <div class="rounded-xl bg-white/5 p-4">
             <div class="flex items-center justify-between gap-3 mb-2">
-              <h3 class="font-semibold">Добавить продукт</h3>
+              <h2 class="font-semibold tracking-tight">Добавить продукт</h2>
               <button id="scanOpenFoodFacts" class="text-xs underline text-white/70">Поиск в интернете*</button>
             </div>
             <div class="grid sm:grid-cols-2 gap-3">
               <div>
                 <label class="text-xs text-white/70">Продукт</label>
-                <input id="foodName" class="w-full mt-1 p-3 rounded-xl bg-white/5 border border-white/10" placeholder="например, куриная грудка" />
+                <input id="foodName" class="field w-full mt-1 p-3 rounded-xl" placeholder="например, куриная грудка" />
               </div>
               <div>
                 <label class="text-xs text-white/70">Граммы</label>
-                <input id="foodGrams" type="number" min="1" class="w-full mt-1 p-3 rounded-xl bg-white/5 border border-white/10" placeholder="100" />
+                <input id="foodGrams" type="number" min="1" class="field w-full mt-1 p-3 rounded-xl" placeholder="100" />
               </div>
               <div class="sm:col-span-2 grid sm:grid-cols-2 gap-3">
                 <div>
                   <label class="text-xs text-white/70">Или выберите из базы</label>
-                  <select id="foodSelect" class="w-full mt-1 p-3 rounded-xl bg-white/5 border border-white/10"></select>
+                  <select id="foodSelect" class="field w-full mt-1 p-3 rounded-xl"></select>
                 </div>
-                <button id="addFood" class="mt-6 sm:mt-auto bg-brand-500 hover:bg-brand-400 transition rounded-xl px-4 py-3 font-semibold shadow-glow">Добавить</button>
+                <button id="addFood" class="mt-6 sm:mt-auto bg-gold-600 hover:bg-gold-500 transition rounded-xl px-4 py-3 font-semibold shadow-glow">Добавить</button>
               </div>
             </div>
-            <p class="text-[11px] text-white/50 mt-2">*Запрос уходит в OpenFoodFacts; если нет ответа, используется локальная база.</p>
+
+            <!-- Manual per100 toggle -->
+            <details class="mt-3">
+              <summary class="text-xs text-white/70 cursor-pointer">Ввести ккал/БЖУ вручную</summary>
+              <div class="grid grid-cols-4 gap-2 mt-2">
+                <input id="mK" type="number" min="0" placeholder="ккал/100г" class="field rounded-xl p-2 text-sm" />
+                <input id="mP" type="number" min="0" placeholder="Б/100г" class="field rounded-xl p-2 text-sm" />
+                <input id="mF" type="number" min="0" placeholder="Ж/100г" class="field rounded-xl p-2 text-sm" />
+                <input id="mC" type="number" min="0" placeholder="У/100г" class="field rounded-xl p-2 text-sm" />
+              </div>
+            </details>
+
+            <p class="text-[11px] text-white/50 mt-2">*Запрос уходит в OpenFoodFacts; при отсутствии ответа используется локальная база или ручной ввод.</p>
           </div>
 
+          <!-- Wish calc -->
           <div class="rounded-xl bg-white/5 p-4">
-            <h3 class="font-semibold mb-2">Сколько можно съесть?</h3>
+            <h3 class="font-semibold mb-2 tracking-tight">Сколько можно съесть?</h3>
             <div class="grid gap-2">
-              <input id="wishFood" class="w-full p-3 rounded-xl bg-white/5 border border-white/10" placeholder="например, шоколад" />
+              <input id="wishFood" class="field w-full p-3 rounded-xl" placeholder="например, шоколад" />
               <div class="grid grid-cols-2 gap-2">
-                <input id="wishKcalPer100" type="number" class="w-full p-3 rounded-xl bg-white/5 border border-white/10" placeholder="ккал/100г (если знаете)" />
+                <input id="wishKcalPer100" type="number" class="field w-full p-3 rounded-xl" placeholder="ккал/100г (если знаете)" />
                 <button id="calcWish" class="bg-white/10 hover:bg-white/20 rounded-xl px-4 py-3">Рассчитать граммы</button>
               </div>
               <div class="text-sm text-white/80" id="wishResult">—</div>
@@ -144,9 +159,15 @@
           </div>
         </div>
 
+        <!-- Today list -->
         <div class="rounded-xl bg-white/5 p-4">
-          <div class="flex items-center justify-between mb-2"><h3 class="font-semibold">Сегодняшние приёмы пищи</h3>
-            <button id="clearToday" class="text-xs text-red-300">Очистить день</button></div>
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-semibold tracking-tight">Сегодняшние приёмы пищи</h3>
+            <div class="flex items-center gap-3">
+              <button id="copyToday" class="text-xs text-white/70">Дублировать на завтра</button>
+              <button id="clearToday" class="text-xs text-red-300">Очистить день</button>
+            </div>
+          </div>
           <div id="meals" class="grid gap-2"></div>
         </div>
       </div>
@@ -155,7 +176,7 @@
       <div id="tab-workouts" class="p-5 grid gap-5 hide">
         <div class="rounded-xl bg-white/5 p-4">
           <div class="flex items-center justify-between gap-3 mb-3">
-            <h3 class="font-semibold">Программа тренировки</h3>
+            <h3 class="font-semibold tracking-tight">Программа тренировки</h3>
             <div class="text-xs text-white/70">Расположение: <span id="locLabel">—</span></div>
           </div>
           <div id="workoutPlan" class="grid md:grid-cols-2 gap-3"></div>
@@ -164,17 +185,17 @@
         <div class="rounded-xl bg-white/5 p-4 grid sm:grid-cols-3 gap-3">
           <div>
             <label class="text-xs text-white/70">Минут тренировки</label>
-            <input id="mins" type="number" min="0" class="mt-1 w-full p-3 rounded-xl bg-white/5 border border-white/10" placeholder="30" />
+            <input id="mins" type="number" min="0" class="field mt-1 w-full p-3 rounded-xl" placeholder="30" />
           </div>
           <div>
             <label class="text-xs text-white/70">Интенсивность</label>
-            <select id="intensity" class="mt-1 w-full p-3 rounded-xl bg-white/5 border border-white/10">
+            <select id="intensity" class="field mt-1 w-full p-3 rounded-xl">
               <option value="light">Лёгкая</option>
               <option value="moderate">Средняя</option>
               <option value="vigorous">Высокая</option>
             </select>
           </div>
-          <button id="addBurn" class="sm:self-end bg-brand-500 hover:bg-brand-400 transition rounded-xl px-4 py-3 font-semibold shadow-glow">Добавить расход</button>
+          <button id="addBurn" class="sm:self-end bg-gold-600 hover:bg-gold-500 transition rounded-xl px-4 py-3 font-semibold shadow-glow">Добавить расход</button>
         </div>
         <div id="burnLog" class="rounded-xl bg-white/5 p-4 grid gap-2"></div>
       </div>
@@ -183,32 +204,32 @@
       <div id="tab-profile" class="p-5 grid gap-5 hide">
         <div class="rounded-xl bg-white/5 p-4 grid md:grid-cols-2 gap-4">
           <div class="grid gap-2">
-            <h3 class="font-semibold mb-1">Параметры</h3>
+            <h3 class="font-semibold mb-1 tracking-tight">Параметры</h3>
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="text-xs text-white/70">Пол</label>
-                <select id="gender" class="w-full mt-1 p-3 rounded-xl bg-white/5 border border-white/10">
+                <select id="gender" class="field w-full mt-1 p-3 rounded-xl">
                   <option value="male">Мужчина</option>
                   <option value="female">Женщина</option>
                 </select>
               </div>
               <div>
                 <label class="text-xs text-white/70">Возраст</label>
-                <input id="age" type="number" min="10" max="100" class="w-full mt-1 p-3 rounded-xl bg-white/5 border border-white/10" placeholder="28" />
+                <input id="age" type="number" min="10" max="100" class="field w-full mt-1 p-3 rounded-xl" placeholder="28" />
               </div>
               <div>
                 <label class="text-xs text-white/70">Рост (см)</label>
-                <input id="height" type="number" min="120" max="230" class="w-full mt-1 p-3 rounded-xl bg-white/5 border border-white/10" placeholder="175" />
+                <input id="height" type="number" min="120" max="230" class="field w-full mt-1 p-3 rounded-xl" placeholder="175" />
               </div>
               <div>
                 <label class="text-xs text-white/70">Вес (кг)</label>
-                <input id="weight" type="number" min="30" max="250" class="w-full mt-1 p-3 rounded-xl bg-white/5 border border-white/10" placeholder="75" />
+                <input id="weight" type="number" min="30" max="250" class="field w-full mt-1 p-3 rounded-xl" placeholder="75" />
               </div>
             </div>
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="text-xs text-white/70">Цель</label>
-                <select id="goal" class="w-full mt-1 p-3 rounded-xl bg-white/5 border border-white/10">
+                <select id="goal" class="field w-full mt-1 p-3 rounded-xl">
                   <option value="lose">Похудеть</option>
                   <option value="maintain">Поддерживать</option>
                   <option value="gain">Набрать массу</option>
@@ -216,7 +237,7 @@
               </div>
               <div>
                 <label class="text-xs text-white/70">Где тренируетесь?</label>
-                <select id="location" class="w-full mt-1 p-3 rounded-xl bg-white/5 border border-white/10">
+                <select id="location" class="field w-full mt-1 p-3 rounded-xl">
                   <option value="home">Дома</option>
                   <option value="gym">В зале</option>
                 </select>
@@ -224,18 +245,18 @@
             </div>
             <div>
               <label class="text-xs text-white/70">Активность</label>
-              <select id="activity" class="w-full mt-1 p-3 rounded-xl bg-white/5 border border-white/10">
+              <select id="activity" class="field w-full mt-1 p-3 rounded-xl">
                 <option value="1.2">Минимальная</option>
                 <option value="1.375">Лёгкая (1–3 трен/нед)</option>
                 <option value="1.55">Средняя (3–5)</option>
                 <option value="1.725">Высокая (6+)</option>
               </select>
             </div>
-            <button id="saveProfile" class="mt-2 bg-brand-500 hover:bg-brand-400 transition rounded-xl px-4 py-3 font-semibold shadow-glow">Сохранить профиль</button>
+            <button id="saveProfile" class="mt-2 bg-gold-600 hover:bg-gold-500 transition rounded-xl px-4 py-3 font-semibold shadow-glow">Сохранить профиль</button>
           </div>
 
           <div class="grid gap-2">
-            <h3 class="font-semibold mb-1">Ваши расчёты</h3>
+            <h3 class="font-semibold mb-1 tracking-tight">Ваши расчёты</h3>
             <div class="rounded-xl bg-white/5 p-4 grid gap-2 text-sm">
               <div>Базовый метаболизм (Миффлин—Сан Жеор): <span id="bmr">—</span> ккал</div>
               <div>Поддержание (TDEE): <span id="tdee">—</span> ккал</div>
@@ -243,7 +264,7 @@
               <div>Макро ориентиры: <span id="macros">—</span></div>
             </div>
             <div class="rounded-xl bg-white/5 p-4">
-              <h4 class="font-semibold mb-2">Экспорт / Импорт</h4>
+              <h4 class="font-semibold mb-2 tracking-tight">Экспорт / Импорт</h4>
               <div class="grid sm:grid-cols-2 gap-2">
                 <button id="exportBtn" class="bg-white/10 hover:bg-white/20 rounded-xl px-4 py-2">Экспорт JSON</button>
                 <label class="bg-white/10 hover:bg-white/20 rounded-xl px-4 py-2 text-center cursor-pointer">
@@ -254,10 +275,17 @@
           </div>
         </div>
 
+        <!-- History -->
         <div class="rounded-2xl overflow-hidden">
           <table class="w-full text-sm">
             <thead class="bg-white/10">
-              <tr><th class="text-left p-3">Дата</th><th class="text-left p-3">Ккал</th><th class="text-left p-3">Белки</th><th class="text-left p-3">Жиры</th><th class="text-left p-3">Углеводы</th></tr>
+              <tr>
+                <th class="text-left p-3">Дата</th>
+                <th class="text-left p-3">Ккал</th>
+                <th class="text-left p-3">Белки</th>
+                <th class="text-left p-3">Жиры</th>
+                <th class="text-left p-3">Углеводы</th>
+              </tr>
             </thead>
             <tbody id="history" class="bg-white/5"></tbody>
           </table>
@@ -266,7 +294,7 @@
     </section>
   </main>
 
-  <!-- Bottom nav (sticky on mobile) -->
+  <!-- Bottom nav -->
   <footer class="fixed bottom-0 inset-x-0 md:static md:max-w-6xl md:mx-auto md:px-4 md:pb-6">
     <div class="m-3 md:m-0 glass elev rounded-2xl grid grid-cols-3 overflow-hidden">
       <button class="py-3 text-center tab-btn tab-active" data-tab="food">🍽️ Питание</button>
@@ -276,7 +304,19 @@
   </footer>
 
   <script>
-    // ======= Data (tiny local food DB as fallback) =======
+    // ========= Utilities =========
+    const clampNum = (v, min, max) => Math.min(max, Math.max(min, Number(v||0)));
+    const fmt = (n) => Math.round(Number(n||0));
+    const pad = (n) => String(n).padStart(2,'0');
+    const todayKey = () => { // локальная дата, не UTC
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = pad(d.getMonth()+1);
+      const day = pad(d.getDate());
+      return `${y}-${m}-${day}`;
+    };
+
+    // ========= Data (fallback local DB) =========
     const LOCAL_DB = [
       { name: 'Куриная грудка варёная', kcal: 165, protein: 31, fat: 3.6, carbs: 0 },
       { name: 'Рис белый варёный', kcal: 130, protein: 2.7, fat: 0.3, carbs: 28 },
@@ -337,7 +377,7 @@
       }
     };
 
-    // ======= State & Storage =======
+    // ========= State & Storage =========
     const tg = window.Telegram?.WebApp;
     let UID = 'anon';
     if (tg && tg.initDataUnsafe?.user) {
@@ -346,7 +386,7 @@
       document.getElementById('hello').textContent = `Привет, ${tg.initDataUnsafe.user.first_name || 'друг'}!`;
       tg.MainButton.setParams({ text: 'Сохранить профиль', is_visible: false });
       tg.onEvent('mainButtonClicked', () => document.getElementById('saveProfile').click());
-      document.body.style.background = tg.colorScheme === 'dark' ? '#0b0f14' : '#0b0f14';
+      document.body.style.background = '#0b0f14';
     }
 
     const storeKey = (k) => `fitbalance:${UID}:${k}`;
@@ -358,17 +398,14 @@
       meals: read('meals', {}), // map date -> [items]
       burns: read('burns', {}), // map date -> [items]
       kcalLimit: 0,
+      cache: read('cache', { off: {} }) // { off: { queryLower: { name, per100 } } }
     };
 
-    const todayKey = () => new Date().toISOString().slice(0,10);
-
-    // ======= Helpers =======
-    function fmt(n) { return Math.round(n); }
+    // ========= Helpers =========
     function calcBMR({ gender, age, height, weight }) {
-      // Mifflin–St Jeor
       return gender === 'male' ? 10*weight + 6.25*height - 5*age + 5 : 10*weight + 6.25*height - 5*age - 161;
     }
-    function goalOffset(goal) { return goal==='lose' ? -400 : goal==='gain' ? 300 : 0 } // спокойные рекомендации
+    const goalOffset = (goal) => goal==='lose' ? -400 : goal==='gain' ? 300 : 0; // мягкая рекомендация
     function macroTargets(weight, goal) {
       const p = goal==='gain' ? 1.8 : goal==='lose' ? 1.6 : 1.6; // g/kg
       const fat = 0.8; // g/kg
@@ -380,30 +417,8 @@
       sel.innerHTML = '<option value="">— выбрать продукт —</option>' + LOCAL_DB.map((f,i)=>`<option value="${i}">${f.name} — ${f.kcal} ккал/100г</option>`).join('');
     }
 
-    function addMealItem(name, grams, per100) {
-      const d = todayKey();
-      const list = state.meals[d] || (state.meals[d] = []);
-      const factor = grams/100;
-      const item = {
-        name, grams,
-        kcal: per100.kcal*factor,
-        protein: (per100.protein||0)*factor,
-        fat: (per100.fat||0)*factor,
-        carbs: (per100.carbs||0)*factor,
-      };
-      list.push(item); write('meals', state.meals); renderMeals(); renderEnergy();
-    }
-
-    function addBurnItem(mins, intensity) {
-      const d = todayKey();
-      const list = state.burns[d] || (state.burns[d] = []);
-      const met = intensity==='light' ? 4 : intensity==='moderate' ? 6 : 8; // условный MET
-      const kcal = (met * state.profile.weight * (mins/60));
-      list.push({ mins, intensity, kcal }); write('burns', state.burns); renderBurns(); renderEnergy();
-    }
-
-    function sumDay(items) { return items?.reduce((a,b)=>a+b.kcal,0)||0 }
-    function sumMacros(items, k) { return items?.reduce((a,b)=>a+(b[k]||0),0)||0 }
+    function sumDay(items) { return items?.reduce((a,b)=>a+Number(b.kcal||0),0)||0 }
+    function sumMacros(items, k) { return items?.reduce((a,b)=>a+Number(b[k]||0),0)||0 }
 
     function renderMeals() {
       const d = todayKey();
@@ -414,8 +429,25 @@
         const row = document.createElement('div');
         row.className = 'flex items-center justify-between bg-white/5 rounded-xl p-3';
         row.innerHTML = `<div><div class="font-medium">${it.name}</div><div class="text-xs text-white/60">${fmt(it.grams)} г • ${fmt(it.kcal)} ккал • Б:${fmt(it.protein)} Ж:${fmt(it.fat)} У:${fmt(it.carbs)}</div></div>
-        <button class="text-xs text-red-300" data-i="${idx}">Удалить</button>`;
-        row.querySelector('button').onclick = (e)=>{ (state.meals[d]||[]).splice(Number(e.target.dataset.i),1); write('meals', state.meals); renderMeals(); renderEnergy(); };
+        <div class="flex items-center gap-3">
+          <button class="text-xs" data-act="-50" title="-50 г">−50г</button>
+          <button class="text-xs" data-act="+50" title="+50 г">+50г</button>
+          <button class="text-xs text-red-300" data-i="${idx}">Удалить</button>
+        </div>`;
+        row.querySelector('[data-i]')?.addEventListener('click', (e)=>{ (state.meals[d]||[]).splice(Number(e.target.dataset.i),1); write('meals', state.meals); renderMeals(); renderEnergy(); });
+        row.querySelectorAll('[data-act]')?.forEach(btn=>{
+          btn.addEventListener('click', (e)=>{
+            const sign = String(e.target.dataset.act);
+            const delta = sign.startsWith('-') ? -50 : 50;
+            it.grams = Math.max(1, it.grams + delta);
+            const factor = it.grams/100;
+            it.kcal = it.per100.kcal*factor;
+            it.protein = (it.per100.protein||0)*factor;
+            it.fat = (it.per100.fat||0)*factor;
+            it.carbs = (it.per100.carbs||0)*factor;
+            write('meals', state.meals); renderMeals(); renderEnergy();
+          })
+        });
         box.appendChild(row);
       })
     }
@@ -449,7 +481,7 @@
       document.getElementById('kcalNet').textContent = fmt(net);
       document.getElementById('kcalRemain').textContent = `${fmt(remain)} ккал`;
       document.getElementById('goalBadge').textContent = `Цель: ${prof.goal==='lose'?'Похудение':prof.goal==='gain'?'Масса':'Поддержание'}`;
-      // update wish helper
+      // update wish helper live
       const per100 = Number(document.getElementById('wishKcalPer100').value||0);
       if (per100>0) {
         const grams = Math.max(0, Math.floor((remain / per100) * 100));
@@ -483,14 +515,15 @@
 
     function renderHistory() {
       const tbody = document.getElementById('history'); tbody.innerHTML = '';
-      const days = Object.keys(state.meals).sort().slice(-14); // последние 14 дней
+      const allDays = Array.from(new Set([...Object.keys(state.meals), ...Object.keys(state.burns)])).sort();
+      const days = allDays.slice(-14); // последние 14 дней
       days.forEach(d=>{
         const meals = state.meals[d]||[];
         const burns = state.burns[d]||[];
-        const kcal = (meals.reduce((a,b)=>a+b.kcal,0) - burns.reduce((a,b)=>a+b.kcal,0));
-        const p = meals.reduce((a,b)=>a+(b.protein||0),0);
-        const f = meals.reduce((a,b)=>a+(b.fat||0),0);
-        const c = meals.reduce((a,b)=>a+(b.carbs||0),0);
+        const kcal = (sumDay(meals) - sumDay(burns));
+        const p = sumMacros(meals,'protein');
+        const f = sumMacros(meals,'fat');
+        const c = sumMacros(meals,'carbs');
         const tr = document.createElement('tr');
         tr.innerHTML = `<td class="p-3 text-white/80">${d}</td><td class="p-3">${fmt(kcal)}</td><td class="p-3">${fmt(p)}</td><td class="p-3">${fmt(f)}</td><td class="p-3">${fmt(c)}</td>`;
         tbody.appendChild(tr);
@@ -508,13 +541,15 @@
         card.innerHTML = `<div class="text-xs text-white/60">${ex.muscle}</div>
           <div class="font-semibold">${ex.name}</div>
           <div class="text-sm text-white/70">${ex.sets} ${ex.note?('• '+ex.note):''}</div>
-          <a class="inline-block mt-2 text-brand-300 underline" href="${url}" target="_blank" rel="noopener">Видео</a>`;
+          <a class="inline-block mt-2 text-gold-300 underline" href="${url}" target="_blank" rel="noopener">Видео</a>`;
         wrap.appendChild(card);
       })
     }
 
-    // ======= Internet providers =======
+    // ========= OpenFoodFacts =========
     async function searchOpenFoodFacts(q) {
+      const key = q.trim().toLowerCase();
+      if (state.cache.off[key]) return state.cache.off[key];
       try {
         const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&search_simple=1&json=1&page_size=1`;
         const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
@@ -530,11 +565,36 @@
           carbs: nutr['carbohydrates_100g'] ?? 0,
         };
         if (!per100.kcal) return null;
-        return { name: p.product_name || q, per100 };
+        const result = { name: p.product_name || q, per100 };
+        state.cache.off[key] = result; write('cache', state.cache);
+        return result;
       } catch (e) { return null }
     }
 
-    // ======= Events =======
+    // ========= Meal / Burn adders =========
+    function addMealItem(name, grams, per100) {
+      const d = todayKey();
+      const list = state.meals[d] || (state.meals[d] = []);
+      const factor = grams/100;
+      const item = {
+        name, grams, per100,
+        kcal: per100.kcal*factor,
+        protein: (per100.protein||0)*factor,
+        fat: (per100.fat||0)*factor,
+        carbs: (per100.carbs||0)*factor,
+      };
+      list.push(item); write('meals', state.meals); renderMeals(); renderEnergy();
+    }
+
+    function addBurnItem(mins, intensity) {
+      const d = todayKey();
+      const list = state.burns[d] || (state.burns[d] = []);
+      const met = intensity==='light' ? 4 : intensity==='moderate' ? 6 : 8; // условный MET
+      const kcal = (met * state.profile.weight * (mins/60));
+      list.push({ mins, intensity, kcal }); write('burns', state.burns); renderBurns(); renderEnergy();
+    }
+
+    // ========= Events =========
     document.addEventListener('DOMContentLoaded', () => {
       foodsToOptions();
       renderProfile();
@@ -542,6 +602,7 @@
       renderBurns();
       renderEnergy();
 
+      // Tabs
       document.querySelectorAll('.tab-btn').forEach(btn=>{
         btn.addEventListener('click', ()=>{
           document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('tab-active'));
@@ -553,78 +614,135 @@
         })
       })
 
+      // Select from local DB
       document.getElementById('foodSelect').addEventListener('change', e=>{
         const i = e.target.value; if (i==='') return;
         const f = LOCAL_DB[Number(i)];
         document.getElementById('foodName').value = f.name;
         document.getElementById('foodGrams').value = 100;
+        document.getElementById('mK').value = f.kcal; // автоподстановка для ручного блока
+        document.getElementById('mP').value = f.protein || 0;
+        document.getElementById('mF').value = f.fat || 0;
+        document.getElementById('mC').value = f.carbs || 0;
       })
 
-      document.getElementById('addFood').addEventListener('click', ()=>{
+      // Add food
+      document.getElementById('addFood').addEventListener('click', async ()=>{
         const name = document.getElementById('foodName').value.trim();
-        let grams = Number(document.getElementById('foodGrams').value);
+        let grams = clampNum(document.getElementById('foodGrams').value, 1, 5000);
         if (!name || !grams) return alert('Укажите продукт и граммы');
-        // try to resolve per100 from local DB first
-        let per100 = LOCAL_DB.find(f=>f.name.toLowerCase()===name.toLowerCase());
+
+        // priority: manual per100 -> local db -> OFF API -> default
+        let per100 = null;
+        const mK = Number(document.getElementById('mK').value||0);
+        const mP = Number(document.getElementById('mP').value||0);
+        const mF = Number(document.getElementById('mF').value||0);
+        const mC = Number(document.getElementById('mC').value||0);
+        if (mK>0) per100 = { kcal: mK, protein: mP, fat: mF, carbs: mC };
+
         if (!per100) {
-          // heuristic: if selection chosen but edited name, try selected index
+          // try local DB exact match or selected index
           const sel = document.getElementById('foodSelect');
           if (sel.value!=='') per100 = LOCAL_DB[Number(sel.value)];
+          if (!per100) per100 = LOCAL_DB.find(f=>f.name.toLowerCase()===name.toLowerCase());
         }
+
+        if (!per100) { // try OFF
+          const res = await searchOpenFoodFacts(name);
+          if (res?.per100?.kcal) {
+            per100 = res.per100;
+            // also hint to wishKcal field if empty
+            if (!document.getElementById('wishKcalPer100').value) {
+              document.getElementById('wishKcalPer100').value = fmt(per100.kcal);
+            }
+          }
+        }
+
         if (!per100) { per100 = { kcal: 100, protein: 0, fat: 0, carbs: 0 }; }
         addMealItem(name, grams, per100);
         document.getElementById('foodName').value='';
         document.getElementById('foodGrams').value='';
         document.getElementById('foodSelect').value='';
+        document.getElementById('mK').value=''; document.getElementById('mP').value=''; document.getElementById('mF').value=''; document.getElementById('mC').value='';
       })
 
+      // Duplicate day to tomorrow
+      document.getElementById('copyToday').addEventListener('click', ()=>{
+        const d = todayKey();
+        const items = (state.meals[d]||[]).map(it=>({ ...it }));
+        if (!items.length) return alert('Нет записей для копирования');
+        const t = new Date(); t.setDate(t.getDate()+1);
+        const tomorrow = `${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`;
+        state.meals[tomorrow] = items; write('meals', state.meals);
+        alert('Скопировано на завтра'); renderHistory();
+      })
+
+      // Clear today
       document.getElementById('clearToday').addEventListener('click', ()=>{
         if (!confirm('Очистить сегодняшние записи?')) return;
         state.meals[todayKey()] = []; write('meals', state.meals); renderMeals(); renderEnergy();
       })
 
+      // Wish calc
       document.getElementById('calcWish').addEventListener('click', ()=>{
         const per100 = Number(document.getElementById('wishKcalPer100').value||0);
         if (!per100) { alert('Укажите ккал/100г для оценки'); return }
-        const remain = Math.max(0, state.kcalLimit - (sumDay(state.meals[todayKey()]) - sumDay(state.burns[todayKey()])));
+        const eaten = sumDay(state.meals[todayKey()]);
+        const burned = sumDay(state.burns[todayKey()]);
+        const remain = Math.max(0, state.kcalLimit - (eaten - burned));
         const grams = Math.max(0, Math.floor((remain / per100) * 100));
         document.getElementById('wishResult').textContent = grams?`Можно ~ ${grams} г, чтобы не превысить лимит.`:'—';
       })
 
+      // Add burn
       document.getElementById('addBurn').addEventListener('click', ()=>{
-        const mins = Number(document.getElementById('mins').value||0);
+        const mins = clampNum(document.getElementById('mins').value, 0, 300);
         const intensity = document.getElementById('intensity').value;
         if (!mins) return alert('Укажите минуты');
         addBurnItem(mins, intensity);
         document.getElementById('mins').value='';
       })
 
+      // Save profile
+      const profileInputs = ['gender','age','height','weight','goal','activity','location'];
+      profileInputs.forEach(id=>{
+        document.getElementById(id).addEventListener('input', ()=>{
+          if (tg) tg.MainButton.show();
+        })
+      });
+
       document.getElementById('saveProfile').addEventListener('click', ()=>{
         state.profile = {
           gender: document.getElementById('gender').value,
-          age: Number(document.getElementById('age').value||28),
-          height: Number(document.getElementById('height').value||175),
-          weight: Number(document.getElementById('weight').value||75),
+          age: clampNum(document.getElementById('age').value, 10, 100),
+          height: clampNum(document.getElementById('height').value, 120, 230),
+          weight: clampNum(document.getElementById('weight').value, 30, 250),
           goal: document.getElementById('goal').value,
           activity: Number(document.getElementById('activity').value),
           location: document.getElementById('location').value,
         };
         write('profile', state.profile);
-        if (tg) { tg.HapticFeedback.impactOccurred('light'); tg.showAlert('Профиль сохранён'); }
+        if (tg) { tg.HapticFeedback.impactOccurred('light'); tg.showAlert('Профиль сохранён'); tg.MainButton.hide(); }
         renderProfile(); renderEnergy();
       })
 
+      // OFF search button
       document.getElementById('scanOpenFoodFacts').addEventListener('click', async ()=>{
         const q = prompt('Что ищем?'); if (!q) return;
         const res = await searchOpenFoodFacts(q);
         if (!res) { alert('Не найдено. Используйте локальную базу или введите ккал/100г вручную.'); return }
         document.getElementById('foodName').value = res.name;
         document.getElementById('foodGrams').value = 100;
+        document.getElementById('mK').value = fmt(res.per100.kcal);
+        document.getElementById('mP').value = fmt(res.per100.protein||0);
+        document.getElementById('mF').value = fmt(res.per100.fat||0);
+        document.getElementById('mC').value = fmt(res.per100.carbs||0);
         alert(`${res.name}: ~${Math.round(res.per100.kcal)} ккал/100г`);
       })
 
+      // Export / Import
       document.getElementById('exportBtn').addEventListener('click', ()=>{
-        const data = { profile: state.profile, meals: state.meals, burns: state.burns };
+        const data = { version: 1, profile: state.profile, meals: state.meals, burns: state.burns, cache: state.cache };
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob); a.download = `fitbalance-${UID}-${todayKey()}.json`; a.click();
@@ -632,7 +750,15 @@
       document.getElementById('importFile').addEventListener('change', async (e)=>{
         const file = e.target.files?.[0]; if (!file) return;
         const text = await file.text();
-        try { const data = JSON.parse(text); if (data.profile) state.profile = data.profile; if (data.meals) state.meals = data.meals; if (data.burns) state.burns = data.burns; write('profile', state.profile); write('meals', state.meals); write('burns', state.burns); renderProfile(); renderMeals(); renderBurns(); renderEnergy(); alert('Импортировано'); } catch { alert('Ошибка импорта'); }
+        try {
+          const data = JSON.parse(text);
+          if (data.profile) state.profile = data.profile;
+          if (data.meals) state.meals = data.meals;
+          if (data.burns) state.burns = data.burns;
+          if (data.cache) state.cache = data.cache;
+          write('profile', state.profile); write('meals', state.meals); write('burns', state.burns); write('cache', state.cache);
+          renderProfile(); renderMeals(); renderBurns(); renderEnergy(); alert('Импортировано');
+        } catch { alert('Ошибка импорта'); }
       })
     });
   </script>
