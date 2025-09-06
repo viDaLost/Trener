@@ -7,80 +7,307 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --color-primary: #3B82F6;
+            --color-secondary: #8B5CF6;
+            --color-success: #10B981;
+            --color-warning: #F59E0B;
+            --color-danger: #EF4444;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1f2937;
+            --bg-secondary: #374151;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --border-color: #4b5563;
+            --shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
         body {
             font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
             -webkit-tap-highlight-color: transparent;
         }
+
         .ios-scroll {
             -webkit-overflow-scrolling: touch;
         }
+
         .blur-bg {
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.8);
         }
+
+        [data-theme="dark"] .blur-bg {
+            background: rgba(31, 41, 55, 0.8);
+        }
+
         .gradient-text {
             background: linear-gradient(90deg, #FF9A8B 0%, #FF6B95 50%, #FF8E53 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+
+        .enhanced-card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .enhanced-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            transition: all 0.2s ease;
+            transform: translateY(0);
+        }
+
+        .btn-primary:active {
+            transform: translateY(2px);
+        }
+
+        .circular-progress {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: conic-gradient(var(--color-primary) calc(var(--progress) * 3.6deg), #e5e7eb 0deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .circular-progress::before {
+            content: "";
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--bg-primary);
+        }
+
+        .progress-value {
+            position: relative;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .water-glass {
+            width: 60px;
+            height: 100px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 0 0 15px 15px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid var(--border-color);
+        }
+
+        .water-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, #3B82F6, #60A5FA);
+            transition: height 0.5s ease;
+            border-radius: 0 0 13px 13px;
+        }
+
+        .water-markers {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+        }
+
+        .water-markers span {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .water-markers span:nth-child(1) { top: 25%; }
+        .water-markers span:nth-child(2) { top: 50%; }
+        .water-markers span:nth-child(3) { top: 75%; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .new-item {
+            animation: slideIn 0.3s ease;
+        }
+
+        .theme-toggle {
+            transition: all 0.3s ease;
+        }
+
+        main > div {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        main > div.hidden {
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+            position: absolute;
+            width: 100%;
+            height: 0;
+            overflow: hidden;
+        }
+
+        main > div:not(.hidden) {
+            opacity: 1;
+            transform: translateY(0);
+            height: auto;
+            position: relative;
+        }
+
+        .modal {
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .modal-content {
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.hidden .modal-content {
+            transform: translateY(20px);
+        }
+
+        .search-results {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            box-shadow: var(--shadow);
+        }
+
+        .search-item {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+        }
+
+        .search-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .rest-timer-btn {
+            background: linear-gradient(135deg, #8B5CF6, #EC4899);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+        }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900 ios-scroll">
-    <div id="app" class="max-w-md mx-auto min-h-screen flex flex-col bg-white shadow-lg overflow-hidden">
+<body class="ios-scroll">
+    <div id="app" class="max-w-md mx-auto min-h-screen flex flex-col bg-white shadow-lg overflow-hidden" data-theme="light">
         <!-- Header -->
-        <header class="blur-bg bg-white/80 sticky top-0 z-10 border-b border-gray-200/80 px-6 py-4">
+        <header class="blur-bg sticky top-0 z-10 border-b border-gray-200/80 px-6 py-4">
             <div class="flex justify-between items-center">
                 <h1 class="text-xl font-semibold gradient-text">Fitness Pro</h1>
-                <button class="p-2 rounded-full bg-gray-100">
-                    <i data-feather="user"></i>
-                </button>
+                <div class="flex items-center space-x-2">
+                    <button id="themeToggle" class="p-2 rounded-full bg-gray-100">
+                        <i data-feather="moon" class="theme-toggle-icon"></i>
+                    </button>
+                    <button class="p-2 rounded-full bg-gray-100">
+                        <i data-feather="user"></i>
+                    </button>
+                </div>
             </div>
         </header>
 
         <!-- Main Content -->
-        <main class="flex-1 overflow-y-auto pb-20">
+        <main class="flex-1 overflow-y-auto pb-20 relative">
             <!-- Dashboard Sections -->
             <div id="dashboard" class="px-6 py-4">
-                <div class="grid grid-cols-3 gap-4 mb-6">
-                    <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-4 shadow-sm">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-xs text-gray-500">Калории</p>
-                                <h3 class="text-xl font-semibold">1,850</h3>
-                                <p class="text-xs text-gray-500">из 2,200</p>
-                            </div>
-                            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                                <i data-feather="activity" class="text-blue-500"></i>
-                            </div>
+                <!-- Статистика с круговыми индикаторами -->
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="enhanced-card flex items-center">
+                        <div class="circular-progress mr-3" style="--progress: 84">
+                            <span class="progress-value">84%</span>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500">Калории</p>
+                            <h3 class="text-lg font-semibold">1,850</h3>
+                            <p class="text-xs text-gray-500">из 2,200</p>
                         </div>
                     </div>
-                    <div class="bg-gradient-to-br from-green-50 to-teal-50 rounded-2xl p-4 shadow-sm">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-xs text-gray-500">Белки</p>
-                                <h3 class="text-xl font-semibold">120г</h3>
-                                <p class="text-xs text-gray-500">из 150г</p>
-                            </div>
-                            <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                                <i data-feather="egg" class="text-green-500"></i>
-                            </div>
+                    
+                    <div class="enhanced-card flex items-center">
+                        <div class="circular-progress mr-3" style="--progress: 80">
+                            <span class="progress-value">80%</span>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500">Белки</p>
+                            <h3 class="text-lg font-semibold">120г</h3>
+                            <p class="text-xs text-gray-500">из 150г</p>
                         </div>
                     </div>
-                    <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-4 shadow-sm">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-xs text-gray-500">Вода</p>
-                                <h3 class="text-xl font-semibold">1.5л</h3>
-                                <p class="text-xs text-gray-500">из 2л</p>
+                </div>
+
+                <!-- Трекер воды -->
+                <div class="enhanced-card mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-semibold">Гидратация</h3>
+                        <span class="text-sm text-blue-500" id="waterDisplay">1.5л / 2л</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="water-glass mr-4">
+                            <div class="water-fill" id="waterFill" style="height: 75%"></div>
+                            <div class="water-markers">
+                                <span></span><span></span><span></span>
                             </div>
-                            <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center">
-                                <i data-feather="droplet" class="text-yellow-500"></i>
-                            </div>
+                        </div>
+                        
+                        <div class="water-actions flex space-x-2 overflow-x-auto flex-1">
+                            <button onclick="addWater(100)" class="flex-shrink-0 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg flex items-center">
+                                <i data-feather="plus" class="w-4 h-4 mr-1"></i>100мл
+                            </button>
+                            <button onclick="addWater(200)" class="flex-shrink-0 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg flex items-center">
+                                <i data-feather="plus" class="w-4 h-4 mr-1"></i>200мл
+                            </button>
+                            <button onclick="addWater(250)" class="flex-shrink-0 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg flex items-center">
+                                <i data-feather="plus" class="w-4 h-4 mr-1"></i>250мл
+                            </button>
+                            <button onclick="addWater(500)" class="flex-shrink-0 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg flex items-center">
+                                <i data-feather="plus" class="w-4 h-4 mr-1"></i>500мл
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -89,11 +316,11 @@
                 <div class="mb-6">
                     <h2 class="text-lg font-semibold mb-3">Быстрые действия</h2>
                     <div class="grid grid-cols-2 gap-3">
-                        <button onclick="showFoodModal()" class="bg-blue-500 text-white rounded-xl p-4 flex items-center justify-center flex-col">
+                        <button data-action="add-food" class="btn-primary rounded-xl p-4 flex items-center justify-center flex-col">
                             <i data-feather="plus-circle" class="w-6 h-6 mb-2"></i>
                             <span class="text-sm">Добавить еду</span>
                         </button>
-                        <button onclick="showWorkoutModal()" class="bg-purple-500 text-white rounded-xl p-4 flex items-center justify-center flex-col">
+                        <button data-action="add-workout" class="btn-primary rounded-xl p-4 flex items-center justify-center flex-col">
                             <i data-feather="activity" class="w-6 h-6 mb-2"></i>
                             <span class="text-sm">Тренировка</span>
                         </button>
@@ -106,8 +333,8 @@
                         <h2 class="text-lg font-semibold">Сегодняшний рацион</h2>
                         <button class="text-blue-500 text-sm">Все</button>
                     </div>
-                    <div class="space-y-3">
-                        <div class="bg-gray-50 rounded-xl p-4 flex items-center">
+                    <div class="space-y-3" id="todayMeals">
+                        <div class="enhanced-card flex items-center new-item">
                             <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-3">
                                 <i data-feather="coffee" class="text-green-500"></i>
                             </div>
@@ -120,7 +347,7 @@
                                 <p class="text-xs text-gray-500">8:30</p>
                             </div>
                         </div>
-                        <div class="bg-gray-50 rounded-xl p-4 flex items-center">
+                        <div class="enhanced-card flex items-center new-item">
                             <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mr-3">
                                 <i data-feather="sun" class="text-yellow-500"></i>
                             </div>
@@ -137,10 +364,10 @@
                 </div>
 
                 <!-- Progress Chart -->
-                <div class="bg-white rounded-xl p-4 shadow-sm mb-6">
+                <div class="enhanced-card mb-6">
                     <div class="flex justify-between items-center mb-3">
                         <h2 class="text-lg font-semibold">Прогресс</h2>
-                        <select class="text-sm bg-gray-100 rounded-lg px-2 py-1">
+                        <select class="text-sm bg-gray-100 rounded-lg px-2 py-1" id="progressRange">
                             <option>Неделя</option>
                             <option>Месяц</option>
                             <option>Год</option>
@@ -156,7 +383,7 @@
             <div id="nutrition" class="hidden px-6 py-4">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-xl font-semibold">Питание</h2>
-                    <button onclick="showFoodModal()" class="bg-blue-500 text-white p-2 rounded-full">
+                    <button data-action="add-food" class="bg-blue-500 text-white p-2 rounded-full">
                         <i data-feather="plus"></i>
                     </button>
                 </div>
@@ -189,8 +416,8 @@
                     </div>
                 </div>
                 
-                <div class="space-y-4">
-                    <div class="bg-gray-50 rounded-xl p-4">
+                <div class="space-y-4" id="nutritionMeals">
+                    <div class="enhanced-card">
                         <div class="flex justify-between items-center mb-2">
                             <h3 class="font-medium">Завтрак</h3>
                             <p class="text-sm text-blue-500">450 ккал</p>
@@ -211,7 +438,7 @@
                         </div>
                     </div>
                     
-                    <div class="bg-gray-50 rounded-xl p-4">
+                    <div class="enhanced-card">
                         <div class="flex justify-between items-center mb-2">
                             <h3 class="font-medium">Обед</h3>
                             <p class="text-sm text-blue-500">650 ккал</p>
@@ -237,12 +464,11 @@
                     </div>
                 </div>
             </div>
-
             <!-- Workouts Section -->
             <div id="workouts" class="hidden px-6 py-4">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-xl font-semibold">Тренировки</h2>
-                    <button onclick="showWorkoutModal()" class="bg-purple-500 text-white p-2 rounded-full">
+                    <button data-action="add-workout" class="bg-purple-500 text-white p-2 rounded-full">
                         <i data-feather="plus"></i>
                     </button>
                 </div>
@@ -253,7 +479,7 @@
                         <p class="text-sm text-purple-500">Грудь & Трицепс</p>
                     </div>
                     
-                    <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-4 shadow-sm">
+                    <div class="enhanced-card bg-gradient-to-r from-purple-50 to-blue-50">
                         <div class="flex items-center mb-3">
                             <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mr-3">
                                 <i data-feather="activity" class="text-purple-500"></i>
@@ -272,9 +498,9 @@
                                 <div class="flex-1">
                                     <p class="font-medium">Жим штанги лежа</p>
                                     <p class="text-xs text-gray-500">4 подхода × 8-12 повторений</p>
-                                    <button class="text-xs text-purple-500 mt-1 flex items-center">
+                                    <button class="rest-timer-btn mt-1 flex items-center">
                                         <i data-feather="play-circle" class="w-3 h-3 mr-1"></i>
-                                        Смотреть технику
+                                        Таймер отдыха
                                     </button>
                                 </div>
                             </div>
@@ -286,9 +512,9 @@
                                 <div class="flex-1">
                                     <p class="font-medium">Разводка гантелей</p>
                                     <p class="text-xs text-gray-500">3 подхода × 12-15 повторений</p>
-                                    <button class="text-xs text-purple-500 mt-1 flex items-center">
+                                    <button class="rest-timer-btn mt-1 flex items-center">
                                         <i data-feather="play-circle" class="w-3 h-3 mr-1"></i>
-                                        Смотреть технику
+                                        Таймер отдыха
                                     </button>
                                 </div>
                             </div>
@@ -300,9 +526,9 @@
                                 <div class="flex-1">
                                     <p class="font-medium">Отжимания на брусьях</p>
                                     <p class="text-xs text-gray-500">3 подхода × 10-12 повторений</p>
-                                    <button class="text-xs text-purple-500 mt-1 flex items-center">
+                                    <button class="rest-timer-btn mt-1 flex items-center">
                                         <i data-feather="play-circle" class="w-3 h-3 mr-1"></i>
-                                        Смотреть технику
+                                        Таймер отдыха
                                     </button>
                                 </div>
                             </div>
@@ -317,29 +543,29 @@
                 <div>
                     <h3 class="font-medium mb-3">Рекомендации</h3>
                     <div class="grid grid-cols-2 gap-3">
-                        <div class="bg-gray-50 rounded-xl p-3">
+                        <div class="enhanced-card text-center p-3">
                             <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mb-2 mx-auto">
                                 <i data-feather="zap" class="text-blue-500"></i>
                             </div>
-                            <p class="text-xs text-center">Интервальная тренировка</p>
+                            <p class="text-xs">Интервальная тренировка</p>
                         </div>
-                        <div class="bg-gray-50 rounded-xl p-3">
+                        <div class="enhanced-card text-center p-3">
                             <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mb-2 mx-auto">
                                 <i data-feather="home" class="text-green-500"></i>
                             </div>
-                            <p class="text-xs text-center">Домашний комплекс</p>
+                            <p class="text-xs">Домашний комплекс</p>
                         </div>
-                        <div class="bg-gray-50 rounded-xl p-3">
+                        <div class="enhanced-card text-center p-3">
                             <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mb-2 mx-auto">
                                 <i data-feather="target" class="text-yellow-500"></i>
                             </div>
-                            <p class="text-xs text-center">На пресс</p>
+                            <p class="text-xs">На пресс</p>
                         </div>
-                        <div class="bg-gray-50 rounded-xl p-3">
+                        <div class="enhanced-card text-center p-3">
                             <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mb-2 mx-auto">
                                 <i data-feather="trending-up" class="text-red-500"></i>
                             </div>
-                            <p class="text-xs text-center">На массу</p>
+                            <p class="text-xs">На массу</p>
                         </div>
                     </div>
                 </div>
@@ -355,7 +581,7 @@
                     <p class="text-sm text-gray-500">28 лет, мужчина</p>
                 </div>
                 
-                <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                <div class="enhanced-card mb-6">
                     <h3 class="font-medium mb-3">Цели</h3>
                     <div class="flex justify-between items-center mb-2">
                         <p class="text-sm">Тип тренировок</p>
@@ -371,7 +597,7 @@
                     </div>
                 </div>
                 
-                <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                <div class="enhanced-card mb-6">
                     <h3 class="font-medium mb-3">Показатели</h3>
                     <div class="space-y-3">
                         <div>
@@ -405,19 +631,19 @@
                 </div>
                 
                 <div class="space-y-4">
-                    <button class="w-full bg-white border border-gray-200 rounded-lg py-3 px-4 flex items-center justify-between">
+                    <button class="w-full enhanced-card py-3 px-4 flex items-center justify-between">
                         <span class="font-medium">Настройки</span>
                         <i data-feather="chevron-right" class="text-gray-400"></i>
                     </button>
-                    <button class="w-full bg-white border border-gray-200 rounded-lg py-3 px-4 flex items-center justify-between">
+                    <button class="w-full enhanced-card py-3 px-4 flex items-center justify-between">
                         <span class="font-medium">Подписка</span>
                         <i data-feather="chevron-right" class="text-gray-400"></i>
                     </button>
-                    <button class="w-full bg-white border border-gray-200 rounded-lg py-3 px-4 flex items-center justify-between">
+                    <button class="w-full enhanced-card py-3 px-4 flex items-center justify-between">
                         <span class="font-medium">Помощь</span>
                         <i data-feather="chevron-right" class="text-gray-400"></i>
                     </button>
-                    <button class="w-full bg-white border border-gray-200 rounded-lg py-3 px-4 flex items-center justify-between text-red-500">
+                    <button class="w-full enhanced-card py-3 px-4 flex items-center justify-between text-red-500">
                         <span class="font-medium">Выйти</span>
                         <i data-feather="log-out" class="text-red-400"></i>
                     </button>
@@ -426,31 +652,31 @@
         </main>
 
         <!-- Bottom Navigation -->
-        <nav class="blur-bg bg-white/80 border-t border-gray-200/80 fixed bottom-0 w-full max-w-md flex justify-around py-3">
-            <button onclick="showSection('dashboard')" class="flex flex-col items-center text-blue-500">
+        <nav class="blur-bg border-t border-gray-200/80 fixed bottom-0 w-full max-w-md flex justify-around py-3">
+            <button data-section="dashboard" class="flex flex-col items-center text-blue-500">
                 <i data-feather="home"></i>
                 <span class="text-xs mt-1">Главная</span>
             </button>
-            <button onclick="showSection('nutrition')" class="flex flex-col items-center text-gray-500">
+            <button data-section="nutrition" class="flex flex-col items-center text-gray-500">
                 <i data-feather="pie-chart"></i>
                 <span class="text-xs mt-1">Питание</span>
             </button>
-            <button onclick="showSection('workouts')" class="flex flex-col items-center text-gray-500">
+            <button data-section="workouts" class="flex flex-col items-center text-gray-500">
                 <i data-feather="activity"></i>
                 <span class="text-xs mt-1">Тренировки</span>
             </button>
-            <button onclick="showSection('profile')" class="flex flex-col items-center text-gray-500">
+            <button data-section="profile" class="flex flex-col items-center text-gray-500">
                 <i data-feather="user"></i>
                 <span class="text-xs mt-1">Профиль</span>
             </button>
         </nav>
 
         <!-- Add Food Modal -->
-        <div id="foodModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 hidden">
-            <div class="bg-white rounded-2xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+        <div id="foodModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 hidden modal">
+            <div class="modal-content bg-white rounded-2xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
                 <div class="sticky top-0 bg-white px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                     <h2 class="text-xl font-semibold">Добавить еду</h2>
-                    <button onclick="hideFoodModal()" class="text-gray-500">
+                    <button class="text-gray-500" data-action="close-modal">
                         <i data-feather="x"></i>
                     </button>
                 </div>
@@ -469,14 +695,16 @@
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Продукт</label>
                         <div class="relative">
-                            <input type="text" placeholder="Начните вводить название" class="w-full bg-gray-100 rounded-lg px-4 py-2 pl-10">
+                            <input type="text" id="foodSearch" placeholder="Начните вводить название" 
+                                   class="w-full bg-gray-100 rounded-lg px-4 py-2 pl-10">
                             <i data-feather="search" class="absolute left-3 top-2.5 text-gray-400"></i>
                         </div>
+                        <div id="foodResults" class="search-results hidden mt-1"></div>
                     </div>
                     
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Количество (г)</label>
-                        <input type="number" class="w-full bg-gray-100 rounded-lg px-4 py-2" value="100">
+                        <input type="number" class="w-full bg-gray-100 rounded-lg px-4 py-2" value="100" min="1">
                     </div>
                     
                     <div class="bg-blue-50 rounded-lg p-4 mb-4">
@@ -498,11 +726,11 @@
         </div>
 
         <!-- Add Workout Modal -->
-        <div id="workoutModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 hidden">
-            <div class="bg-white rounded-2xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+        <div id="workoutModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 hidden modal">
+            <div class="modal-content bg-white rounded-2xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
                 <div class="sticky top-0 bg-white px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                     <h2 class="text-xl font-semibold">Добавить тренировку</h2>
-                    <button onclick="hideWorkoutModal()" class="text-gray-500">
+                    <button class="text-gray-500" data-action="close-modal">
                         <i data-feather="x"></i>
                     </button>
                 </div>
@@ -533,15 +761,17 @@
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Упражнение</label>
                         <div class="relative">
-                            <input type="text" placeholder="Начните вводить название" class="w-full bg-gray-100 rounded-lg px-4 py-2 pl-10">
+                            <input type="text" id="exerciseSearch" placeholder="Начните вводить название" 
+                                   class="w-full bg-gray-100 rounded-lg px-4 py-2 pl-10">
                             <i data-feather="search" class="absolute left-3 top-2.5 text-gray-400"></i>
                         </div>
+                        <div id="exerciseResults" class="search-results hidden mt-1"></div>
                     </div>
                     
                     <div class="grid grid-cols-3 gap-3 mb-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Подходы</label>
-                            <input type="number" class="w-full bg-gray-100 rounded-lg px-2 py-1 text-center" value="3">
+                            <input type="number" class="w-full bg-gray-100 rounded-lg px-2 py-1 text-center" value="3" min="1">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Повторения</label>
@@ -549,7 +779,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Вес (кг)</label>
-                            <input type="number" class="w-full bg-gray-100 rounded-lg px-2 py-1 text-center" value="20">
+                            <input type="number" class="w-full bg-gray-100 rounded-lg px-2 py-1 text-center" value="20" min="0" step="0.5">
                         </div>
                     </div>
                     
@@ -564,55 +794,152 @@
                 </div>
             </div>
         </div>
-    </div>
 
+        <!-- Timer Modal -->
+        <div id="timerModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 hidden modal">
+            <div class="modal-content bg-white rounded-2xl w-full max-w-md mx-4 p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold">Таймер отдыха</h2>
+                    <button class="text-gray-500" data-action="close-modal">
+                        <i data-feather="x"></i>
+                    </button>
+                </div>
+                
+                <div class="text-center mb-6">
+                    <div class="text-4xl font-bold mb-4" id="timerDisplay">01:30</div>
+                    <div class="text-gray-500">До следующего подхода</div>
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button class="flex-1 bg-gray-500 text-white py-3 rounded-lg font-medium" data-action="cancel-timer">
+                        Отмена
+                    </button>
+                    <button class="flex-1 bg-green-500 text-white py-3 rounded-lg font-medium" data-action="start-timer">
+                        Старт
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script>
-        // Initialize
-        feather.replace();
-        AOS.init();
-        
-        // Show/Hide Sections
-        function showSection(sectionId) {
-            document.querySelectorAll('main > div').forEach(div => {
-                div.classList.add('hidden');
-            });
-            document.getElementById(sectionId).classList.remove('hidden');
+        // Единый объект для данных приложения
+        const appData = {
+            userProfile: {
+                name: "Алексей",
+                age: 28,
+                weight: 78,
+                height: 182,
+                goal: "Набор массы",
+                level: "Средний",
+                waterTarget: 2000,
+                caloriesTarget: 2200,
+                proteinTarget: 150
+            },
+            today: {
+                water: 1500,
+                calories: 1850,
+                protein: 120,
+                meals: [
+                    {
+                        type: "Завтрак",
+                        time: "8:30",
+                        items: [
+                            { name: "Овсянка", amount: "150г", calories: 300 },
+                            { name: "Банан", amount: "1 шт", calories: 100 },
+                            { name: "Кофе", amount: "250мл", calories: 50 }
+                        ],
+                        totalCalories: 450
+                    },
+                    {
+                        type: "Обед",
+                        time: "13:15",
+                        items: [
+                            { name: "Гречка", amount: "150г", calories: 250 },
+                            { name: "Куриная грудка", amount: "150г", calories: 250 },
+                            { name: "Овощной салат", amount: "100г", calories: 50 },
+                            { name: "Оливковое масло", amount: "10г", calories: 100 }
+                        ],
+                        totalCalories: 650
+                    }
+                ],
+                workouts: [
+                    {
+                        name: "Силовая тренировка",
+                        type: "Грудь & Трицепс",
+                        duration: "45 мин",
+                        exercises: [
+                            { name: "Жим штанги лежа", sets: "4", reps: "8-12" },
+                            { name: "Разводка гантелей", sets: "3", reps: "12-15" },
+                            { name: "Отжимания на брусьях", sets: "3", reps: "10-12" }
+                        ]
+                    }
+                ]
+            },
+            settings: {
+                theme: 'light',
+                notifications: true,
+                dashboardWidgets: {
+                    calories: true,
+                    water: true,
+                    protein: true,
+                    recentMeals: true,
+                    progressChart: true
+                }
+            }
+        };
+
+        // Базы данных для поиска
+        const commonFoods = [
+            { name: "Овсянка", calories: 300, protein: 10, fat: 5, carbs: 50, per: 100 },
+            { name: "Куриная грудка", calories: 165, protein: 31, fat: 3.6, carbs: 0, per: 100 },
+            { name: "Банан", calories: 89, protein: 1.1, fat: 0.3, carbs: 22.8, per: 100 },
+            { name: "Гречка", calories: 343, protein: 13.2, fat: 3.4, carbs: 71.5, per: 100 },
+            { name: "Рис", calories: 130, protein: 2.7, fat: 0.3, carbs: 28.2, per: 100 },
+            { name: "Творог", calories: 98, protein: 11, fat: 4.3, carbs: 3.4, per: 100 }
+        ];
+
+        const commonExercises = [
+            { name: "Жим штанги лежа", muscle: "Грудь", type: "Силовая" },
+            { name: "Приседания со штангой", muscle: "Ноги", type: "Силовая" },
+            { name: "Становая тяга", muscle: "Спина", type: "Силовая" },
+            { name: "Подтягивания", muscle: "Спина", type: "Силовая" },
+            { name: "Отжимания на брусьях", muscle: "Трицепс", type: "Силовая" },
+            { name: "Бег", muscle: "Ноги", type: "Кардио" },
+            { name: "Планка", muscle: "Пресс", type: "Статическая" }
+        ];
+
+        // Основная функция инициализации
+        (function() {
+            // Инициализация библиотек
+            feather.replace();
+            AOS.init();
             
-            // Update active tab
-            document.querySelectorAll('nav button').forEach(btn => {
-                btn.classList.remove('text-blue-500');
-                btn.classList.add('text-gray-500');
-            });
+            // Загрузка данных из localStorage
+            loadSavedData();
             
-            const activeBtn = Array.from(document.querySelectorAll('nav button')).find(btn => 
-                btn.getAttribute('onclick').includes(sectionId)
-            );
+            // Инициализация графиков
+            initCharts();
             
-            if (activeBtn) {
-                activeBtn.classList.remove('text-gray-500');
-                activeBtn.classList.add('text-blue-500');
+            // Настройка обработчиков событий
+            setupEventListeners();
+            
+            // Обновление интерфейса
+            updateUI();
+        })();
+
+        function loadSavedData() {
+            const savedData = localStorage.getItem('fitnessProData');
+            if (savedData) {
+                const parsedData = JSON.parse(savedData);
+                Object.assign(appData, parsedData);
             }
         }
-        
-        // Modal Controls
-        function showFoodModal() {
-            document.getElementById('foodModal').classList.remove('hidden');
+
+        function saveData() {
+            localStorage.setItem('fitnessProData', JSON.stringify(appData));
         }
-        
-        function hideFoodModal() {
-            document.getElementById('foodModal').classList.add('hidden');
-        }
-        
-        function showWorkoutModal() {
-            document.getElementById('workoutModal').classList.remove('hidden');
-        }
-        
-        function hideWorkoutModal() {
-            document.getElementById('workoutModal').classList.add('hidden');
-        }
-        
-        // Progress Chart
-        document.addEventListener('DOMContentLoaded', function() {
+
+        function initCharts() {
             const ctx = document.getElementById('progressChart').getContext('2d');
             const progressChart = new Chart(ctx, {
                 type: 'line',
@@ -654,8 +981,236 @@
                     }
                 }
             });
-        });
-        
+        }
+
+        function setupEventListeners() {
+            // Навигация
+            document.querySelectorAll('[data-section]').forEach(button => {
+                button.addEventListener('click', function() {
+                    const sectionId = this.getAttribute('data-section');
+                    showSection(sectionId);
+                });
+            });
+
+            // Действия
+            document.querySelectorAll('[data-action]').forEach(button => {
+                button.addEventListener('click', function() {
+                    const action = this.getAttribute('data-action');
+                    handleAction(action);
+                });
+            });
+
+            // Поиск продуктов
+            document.getElementById('foodSearch').addEventListener('input', function(e) {
+                searchFood(e.target.value);
+            });
+
+            // Поиск упражнений
+            document.getElementById('exerciseSearch').addEventListener('input', function(e) {
+                searchExercise(e.target.value);
+            });
+
+            // Переключение темы
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+            // Закрытие модальных окон по клику на фон
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        this.classList.add('hidden');
+                    }
+                });
+            });
+
+            // Закрытие по Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    document.querySelectorAll('.modal').forEach(modal => {
+                        modal.classList.add('hidden');
+                    });
+                }
+            });
+        }
+
+        function handleAction(action) {
+            switch(action) {
+                case 'add-food':
+                    showFoodModal();
+                    break;
+                case 'add-workout':
+                    showWorkoutModal();
+                    break;
+                case 'close-modal':
+                    document.querySelectorAll('.modal').forEach(modal => {
+                        modal.classList.add('hidden');
+                    });
+                    break;
+                case 'start-timer':
+                    startTimer(90);
+                    break;
+                case 'cancel-timer':
+                    document.getElementById('timerModal').classList.add('hidden');
+                    break;
+            }
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('main > div').forEach(div => {
+                div.classList.add('hidden');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            
+            // Update active tab
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('text-blue-500');
+                btn.classList.add('text-gray-500');
+            });
+            
+            const activeBtn = Array.from(document.querySelectorAll('nav button')).find(btn => 
+                btn.getAttribute('data-section') === sectionId
+            );
+            
+            if (activeBtn) {
+                activeBtn.classList.remove('text-gray-500');
+                activeBtn.classList.add('text-blue-500');
+            }
+        }
+
+        function showFoodModal() {
+            document.getElementById('foodModal').classList.remove('hidden');
+        }
+
+        function showWorkoutModal() {
+            document.getElementById('workoutModal').classList.remove('hidden');
+        }
+
+        function showTimerModal() {
+            document.getElementById('timerModal').classList.remove('hidden');
+        }
+
+        function addWater(amount) {
+            appData.today.water += amount;
+            updateWaterDisplay();
+            saveData();
+            
+            // Анимация добавления
+            const waterFill = document.getElementById('waterFill');
+            waterFill.style.transition = 'height 0.5s ease';
+            const percentage = Math.min((appData.today.water / appData.userProfile.waterTarget) * 100, 100);
+            waterFill.style.height = percentage + '%';
+        }
+
+        function updateWaterDisplay() {
+            const waterDisplay = document.getElementById('waterDisplay');
+            waterDisplay.textContent = `${(appData.today.water / 1000).toFixed(1)}л / ${(appData.userProfile.waterTarget / 1000).toFixed(1)}л`;
+        }
+
+        function searchFood(query) {
+            const resultsContainer = document.getElementById('foodResults');
+            resultsContainer.innerHTML = '';
+            
+            if (query.length < 2) {
+                resultsContainer.classList.add('hidden');
+                return;
+            }
+            
+            const filtered = commonFoods.filter(food => 
+                food.name.toLowerCase().includes(query.toLowerCase())
+            );
+            
+            if (filtered.length > 0) {
+                resultsContainer.classList.remove('hidden');
+                filtered.forEach(food => {
+                    const item = document.createElement('div');
+                    item.className = 'search-item';
+                    item.textContent = `${food.name} (${food.calories} ккал/100г)`;
+                    item.addEventListener('click', () => {
+                        document.getElementById('foodSearch').value = food.name;
+                        resultsContainer.classList.add('hidden');
+                    });
+                    resultsContainer.appendChild(item);
+                });
+            } else {
+                resultsContainer.classList.add('hidden');
+            }
+        }
+
+        function searchExercise(query) {
+            const resultsContainer = document.getElementById('exerciseResults');
+            resultsContainer.innerHTML = '';
+            
+            if (query.length < 2) {
+                resultsContainer.classList.add('hidden');
+                return;
+            }
+            
+            const filtered = commonExercises.filter(exercise => 
+                exercise.name.toLowerCase().includes(query.toLowerCase())
+            );
+            
+            if (filtered.length > 0) {
+                resultsContainer.classList.remove('hidden');
+                filtered.forEach(exercise => {
+                    const item = document.createElement('div');
+                    item.className = 'search-item';
+                    item.textContent = `${exercise.name} (${exercise.muscle})`;
+                    item.addEventListener('click', () => {
+                        document.getElementById('exerciseSearch').value = exercise.name;
+                        resultsContainer.classList.add('hidden');
+                    });
+                    resultsContainer.appendChild(item);
+                });
+            } else {
+                resultsContainer.classList.add('hidden');
+            }
+        }
+
+        function toggleTheme() {
+            const app = document.getElementById('app');
+            const themeIcon = document.querySelector('.theme-toggle-icon');
+            const currentTheme = app.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            app.setAttribute('data-theme', newTheme);
+            appData.settings.theme = newTheme;
+            
+            // Обновление иконки
+            feather.replace();
+            
+            saveData();
+        }
+
+        function startTimer(seconds) {
+            let timeLeft = seconds;
+            const timerDisplay = document.getElementById('timerDisplay');
+            const startBtn = document.querySelector('[data-action="start-timer"]');
+            
+            const timer = setInterval(() => {
+                const minutes = Math.floor(timeLeft / 60);
+                const secs = timeLeft % 60;
+                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    timerDisplay.textContent = "00:00";
+                    // Воспроизведение звука или уведомление
+                    if (Notification.permission === 'granted') {
+                        new Notification('Fitness Pro', { body: 'Время отдыха истекло!' });
+                    }
+                }
+                
+                timeLeft--;
+            }, 1000);
+            
+            startBtn.textContent = "Пауза";
+            startBtn.setAttribute('data-action', 'pause-timer');
+        }
+
+        function updateUI() {
+            updateWaterDisplay();
+            // Здесь можно добавить обновление других элементов интерфейса
+        }
+
         // Telegram Web App Integration
         if (window.Telegram && window.Telegram.WebApp) {
             Telegram.WebApp.expand();
@@ -664,16 +1219,11 @@
             // Set theme colors
             const theme = Telegram.WebApp.colorScheme;
             if (theme === 'dark') {
-                document.documentElement.classList.add('dark');
+                document.getElementById('app').setAttribute('data-theme', 'dark');
             }
             
             // Handle back button
             Telegram.WebApp.BackButton.onClick(() => {
-                window.history.back();
-            });
-            
-            // Show back button when needed
-            Telegram.WebApp.onEvent('backButtonClicked', () => {
                 window.history.back();
             });
         }
