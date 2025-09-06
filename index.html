@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FitCoach — персональный фитнес</title>
+
+  <!-- Tailwind (fast CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- Icons (optional, lightweight) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+
+  <!-- Your styles last -->
+  <link rel="stylesheet" href="css/styles.css?v=1" />
+</head>
+<body class="min-h-screen bg-gradient-to-b from-[#0f172a] via-[#0b1227] to-[#060a1b] text-slate-100">
+  <header class="w-full sticky top-0 z-30 backdrop-blur bg-white/5 border-b border-white/10">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-400 shadow-md"></div>
+        <h1 class="text-xl font-semibold tracking-tight">FitCoach</h1>
+        <span id="userBadge" class="ml-2 text-xs px-2 py-1 rounded-full bg-white/10 border border-white/10">гость</span>
+      </div>
+      <nav class="hidden sm:flex items-center gap-2 text-sm">
+        <button data-tab="#tab-dashboard" class="tab-btn px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/15">Дэшборд</button>
+        <button data-tab="#tab-food" class="tab-btn px-3 py-1.5 rounded-md hover:bg-white/15">Питание</button>
+        <button data-tab="#tab-workout" class="tab-btn px-3 py-1.5 rounded-md hover:bg-white/15">Тренировки</button>
+        <button data-tab="#tab-stats" class="tab-btn px-3 py-1.5 rounded-md hover:bg-white/15">Статистика</button>
+        <button data-tab="#tab-settings" class="tab-btn px-3 py-1.5 rounded-md hover:bg-white/15">Профиль</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-6 space-y-6">
+    <!-- Onboarding/Profile -->
+    <section id="tab-settings" class="tab-section hidden">
+      <div class="glass p-5">
+        <h2 class="text-lg font-semibold mb-3">Профиль и цели</h2>
+        <p class="text-slate-300 text-sm mb-4">Данные нужны для расчёта дневной нормы калорий и программы тренировок.</p>
+        <form id="profileForm" class="grid sm:grid-cols-2 gap-3">
+          <div class="field">
+            <label>Пол</label>
+            <select id="gender">
+              <option value="male">Мужчина</option>
+              <option value="female">Женщина</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Возраст</label>
+            <input id="age" type="number" min="10" max="100" placeholder="лет" />
+          </div>
+          <div class="field">
+            <label>Рост</label>
+            <input id="height" type="number" min="120" max="230" placeholder="см" />
+          </div>
+          <div class="field">
+            <label>Вес</label>
+            <input id="weight" type="number" min="35" max="250" placeholder="кг" />
+          </div>
+          <div class="field sm:col-span-2">
+            <label>Цель</label>
+            <select id="goal">
+              <option value="lose">Похудение (дефицит ~15%)</option>
+              <option value="maintain">Поддержание</option>
+              <option value="gain">Набор массы (профицит ~15%)</option>
+            </select>
+          </div>
+          <div class="field sm:col-span-2">
+            <label>Где тренируетесь?</label>
+            <select id="location">
+              <option value="home">Дома</option>
+              <option value="gym">В зале</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2 flex gap-3 mt-1">
+            <button type="submit" class="menu-button">Сохранить профиль</button>
+            <button type="button" id="resetDayBtn" class="back-button">Сбросить день</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Dashboard -->
+    <section id="tab-dashboard" class="tab-section">
+      <div class="grid md:grid-cols-3 gap-4">
+        <div class="glass p-5">
+          <h3 class="font-semibold mb-2">Дневная норма</h3>
+          <p class="text-3xl font-bold" id="tdeeText">— ккал</p>
+          <p class="text-slate-400 text-sm" id="goalText">укажите профиль</p>
+        </div>
+        <div class="glass p-5">
+          <h3 class="font-semibold mb-2">Съедено сегодня</h3>
+          <p class="text-3xl font-bold" id="eatenText">0 ккал</p>
+          <p class="text-slate-400 text-sm">белки/жиры/углеводы: <span id="pfcText">0 / 0 / 0 г</span></p>
+        </div>
+        <div class="glass p-5">
+          <h3 class="font-semibold mb-2">Осталось</h3>
+          <p class="text-3xl font-bold" id="leftText">— ккал</p>
+          <p class="text-slate-400 text-sm">сколько ещё можно сегодня</p>
+        </div>
+      </div>
+
+      <div class="glass p-5 mt-4">
+        <h3 class="font-semibold mb-3">Быстрый расчёт по граммам</h3>
+        <form id="quickForm" class="grid sm:grid-cols-3 gap-3 items-end">
+          <div class="field sm:col-span-2">
+            <label>Продукт</label>
+            <input id="quickFood" list="foodsList" type="text" placeholder="например, куриная грудка" />
+            <datalist id="foodsList"></datalist>
+          </div>
+          <div class="field">
+            <label>Граммы</label>
+            <input id="quickGrams" type="number" min="1" placeholder="г" />
+          </div>
+          <button class="start-button sm:col-span-3" type="submit">Добавить к сегодняшнему рациону</button>
+        </form>
+        <p id="quickResult" class="mt-2 text-sm text-emerald-300"></p>
+      </div>
+
+      <div class="glass p-5 mt-4">
+        <h3 class="font-semibold mb-3">Сколько можно съесть без переизбытка?</h3>
+        <form id="fitForm" class="grid sm:grid-cols-3 gap-3 items-end">
+          <div class="field sm:col-span-2">
+            <label>Продукт</label>
+            <input id="fitFood" list="foodsList" type="text" placeholder="например, творог 5%" />
+          </div>
+          <div class="field">
+            <label>Остаток калорий</label>
+            <input id="fitLeft" type="number" min="0" placeholder="ккал (авто)" />
+          </div>
+          <button class="menu-button sm:col-span-3" type="submit">Рассчитать максимально допустимые граммы</button>
+        </form>
+        <p id="fitResult" class="mt-2 text-sm text-cyan-300"></p>
+      </div>
+    </section>
+
+    <!-- Nutrition log -->
+    <section id="tab-food" class="tab-section hidden">
+      <div class="glass p-5">
+        <h3 class="font-semibold mb-3">Сегодняшний рацион</h3>
+        <ul id="logList" class="space-y-2"></ul>
+        <div class="mt-3 text-right">
+          <button id="clearLogBtn" class="wrong-button">Очистить рацион</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Workouts -->
+    <section id="tab-workout" class="tab-section hidden">
+      <div class="glass p-5">
+        <h3 class="font-semibold mb-1">Рекомендованные тренировки</h3>
+        <p class="text-slate-300 text-sm mb-4">Учитываем вашу цель, пол и место тренировки. Упражнения с видео‑ссылками.</p>
+        <div id="workoutPlan" class="grid md:grid-cols-2 gap-4"></div>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section id="tab-stats" class="tab-section hidden">
+      <div class="glass p-5">
+        <h3 class="font-semibold mb-3">Статистика за неделю</h3>
+        <div id="statsBox" class="text-sm text-slate-300">Недостаточно данных. Заполняйте рацион — и здесь появится сжатый отчёт по калориям за 7 дней.</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="max-w-5xl mx-auto px-4 py-10 text-center text-xs text-slate-500">
+    <p>Made for Telegram Mini Apps • Быстрый старт без бэкенда • Локальные данные per user</p>
+  </footer>
+
+  <script>window.__INLINE_FOODS__ = null;</script>
+  <script src="js/app.js?v=1"></script>
+</body>
+</html>
