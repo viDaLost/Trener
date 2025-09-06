@@ -1,49 +1,73 @@
-:root{
-  --glass-bg: rgba(255,255,255,0.06);
-  --glass-border: rgba(255,255,255,0.12);
-  --ring: rgba(59,130,246,.35);
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.12);
   --radius: 14px;
 }
 
-.glass{
+.glass {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius);
-  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
 }
 
-/* Unified inputs */
-.field{width:100%;}
-.field label{display:block;margin-bottom:.4rem;color:#cbd5e1;font-size:.95rem}
-.field input,.field select,.field textarea{
-  width:100%;
-  background:#0b1227;
-  border:1.5px solid #334155;
-  color:#e2e8f0;
-  padding:.75rem .9rem;
-  border-radius:12px;
-  transition:border-color .2s, box-shadow .2s, background .2s;
+.badge {
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, .08);
+  padding: .2rem .5rem;
+  border-radius: 999px;
+  font-size: .75rem;
 }
-.field input::placeholder,.field textarea::placeholder{color:#64748b}
-.field input:focus,.field select:focus,.field textarea:focus{
-  outline:none;border-color:#38bdf8; box-shadow:0 0 0 3px rgba(56,189,248,.25)
+
+nav .tab-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: .6rem 0;
+  font-size: .8rem;
+  color: #cbd5e1;
 }
-.field .is-invalid{border-color:#ef4444!important; box-shadow:0 0 0 3px rgba(239,68,68,.2)!important}
-.field .is-valid{border-color:#22c55e!important; box-shadow:0 0 0 3px rgba(34,197,94,.2)!important}
-
-/* Buttons baseline to complement Tailwind utility */
-.menu-button,.start-button,.back-button,.wrong-button,.correct-button{
-  display:inline-flex;align-items:center;justify-content:center;
-  background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
-  border:1px solid var(--glass-border);
-  border-radius:12px; padding:.9rem 1rem; font-weight:600
+nav .tab-btn.active {
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, .06);
 }
-.menu-button:hover,.start-button:hover,.back-button:hover,.wrong-button:hover,.correct-button:hover{filter:brightness(1.05)}
-.correct-button{background:linear-gradient(180deg,#16a34a,#15803d); border-color:#14532d}
-.wrong-button{background:linear-gradient(180deg,#dc2626,#b91c1c); border-color:#7f1d1d}
 
-/* Tab buttons active state */
-.tab-btn.active{background:rgba(255,255,255,.16)}
+.field label {
+  display: block;
+  margin-bottom: .35rem;
+  color: #cbd5e1;
+  font-size: .9rem;
+}
+.field input,
+.field select {
+  width: 100%;
+  background: #0b1227;
+  border: 1.5px solid #334155;
+  color: #e2e8f0;
+  padding: .75rem .9rem;
+  border-radius: 12px;
+}
+.field input:focus,
+.field select:focus {
+  outline: none;
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, .25);
+}
 
-/* Small chips */
-.badge{border:1px solid var(--glass-border); background:rgba(255,255,255,.08); padding:.2rem .5rem; border-radius:999px; font-size:.75rem}
+.menu-button,
+.start-button,
+.back-button,
+.wrong-button {
+  display: inline-flex;
+  justify-content: center;
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: .8rem 1rem;
+  font-weight: 600;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, .06));
+}
+
+.wrong-button {
+  background: linear-gradient(180deg, #dc2626, #b91c1c);
+  color: #fff;
+}
