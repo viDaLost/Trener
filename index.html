@@ -1,766 +1,682 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="light">
+<html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>FitBalance — питание, тренировки, профиль</title>
-  <meta name="description" content="FitBalance — калькулятор калорий, рекомендации по тренировкам, статистика питания. Поддержка Telegram WebApp." />
-
-  <!-- Fonts & Tailwind -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
-          colors: {
-            ink: '#0b0f14',
-            gold: {
-              50: '#fff8e6', 100: '#fdebb8', 200: '#f9d979', 300: '#f4c240', 400: '#e9ad1c', 500: '#d4af37', 600: '#b89426', 700: '#8f6f1c', 800: '#6b5216', 900: '#4f3c10'
-            },
-          },
-          boxShadow: {
-            soft: '0 8px 30px rgba(0,0,0,.22)',
-            glow: '0 0 0 6px rgba(212,175,55,.14)'
-          },
-          animation: { fade: 'fade .35s ease both' },
-          keyframes: { fade: { '0%': { opacity: 0, transform: 'translateY(4px)' }, '100%': { opacity: 1, transform: 'none' } } }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Pro | Ваш персональный тренер</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
-      }
-    }
-  </script>
-
-  <style>
-    :root { color-scheme: light dark; }
-    html, body { height: 100%; background: radial-gradient(1200px 600px at 10% -10%, rgba(212,175,55,0.06), transparent), radial-gradient(900px 500px at 90% -20%, rgba(212,175,55,0.04), transparent), #0b0f14; }
-    .glass { -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); border: 1px solid rgba(255,255,255,.12); }
-    .elev { box-shadow: 0 18px 50px rgba(0,0,0,.28); }
-    .tab-active { color: #fff; background: linear-gradient(180deg, rgba(212,175,55,.12), rgba(212,175,55,.06)); }
-    .hide { display: none; }
-    .field { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12); }
-    .field:focus { outline: none; box-shadow: 0 0 0 3px rgba(212,175,55,.18); border-color: rgba(212,175,55,.35); }
-  </style>
-
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+        .ios-scroll {
+            -webkit-overflow-scrolling: touch;
+        }
+        .blur-bg {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #FF9A8B 0%, #FF6B95 50%, #FF8E53 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
 </head>
-<body class="font-sans text-white/90 antialiased">
-  <!-- Topbar -->
-  <header class="max-w-6xl mx-auto px-4 pt-6">
-    <div class="glass elev rounded-2xl p-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="size-10 rounded-xl bg-gold-600 grid place-items-center shadow-glow" aria-hidden="true">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M7 4h10a2 2 0 0 1 2 2v3a7 7 0 1 1-14 0V6a2 2 0 0 1 2-2Z" stroke="#fff" stroke-width="1.5"/>
-            <path d="M9 18h6" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <div>
-          <div class="text-lg font-semibold tracking-tight">FitBalance</div>
-          <div class="text-xs text-white/60" id="hello">Здравствуйте</div>
-        </div>
-      </div>
-      <div class="text-sm text-white/70" id="goalBadge">Цель: —</div>
-    </div>
-  </header>
-
-  <!-- Main -->
-  <main class="max-w-6xl mx-auto px-4 py-6 grid gap-6">
-    <!-- Energy card -->
-    <section class="glass elev rounded-2xl p-5 animate-fade" id="energyCard">
-      <div class="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 class="text-xl font-semibold mb-1 tracking-tight">Сегодняшний баланс</h1>
-          <p class="text-sm text-white/70">Калории за день и лимит по цели.</p>
-        </div>
-        <div class="text-right">
-          <div class="text-3xl font-bold" id="kcalRemain">— ккал</div>
-          <div class="text-xs text-white/60">осталось из <span id="kcalLimit">—</span> ккал</div>
-        </div>
-      </div>
-      <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="rounded-xl bg-white/5 p-4">
-          <div class="text-sm text-white/70">Съедено</div>
-          <div class="text-2xl font-semibold" id="kcalEaten">0</div>
-        </div>
-        <div class="rounded-xl bg-white/5 p-4">
-          <div class="text-sm text-white/70">Тренировка (расход)</div>
-          <div class="text-2xl font-semibold" id="kcalBurned">0</div>
-        </div>
-        <div class="rounded-xl bg-white/5 p-4">
-          <div class="text-sm text-white/70">Итог</div>
-          <div class="text-2xl font-semibold" id="kcalNet">0</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Tabs container -->
-    <section class="glass elev rounded-2xl overflow-hidden animate-fade">
-      <nav class="grid grid-cols-3 bg-white/5">
-        <button class="tab-btn py-3 text-center font-medium tab-active" data-tab="food" aria-label="Питание">График питания</button>
-        <button class="tab-btn py-3 text-center font-medium" data-tab="workouts" aria-label="Тренировки">График тренировок</button>
-        <button class="tab-btn py-3 text-center font-medium" data-tab="profile" aria-label="Профиль">Профиль</button>
-      </nav>
-
-      <!-- Food tab -->
-      <div id="tab-food" class="p-5 grid gap-5">
-        <div class="grid md:grid-cols-[1.2fr_.8fr] gap-4">
-          <!-- Add product -->
-          <div class="rounded-xl bg-white/5 p-4">
-            <div class="flex items-center justify-between gap-3 mb-2">
-              <h2 class="font-semibold tracking-tight">Добавить продукт</h2>
-              <button id="scanOpenFoodFacts" class="text-xs underline text-white/70">Поиск в интернете*</button>
+<body class="bg-gray-50 text-gray-900 ios-scroll">
+    <div id="app" class="max-w-md mx-auto min-h-screen flex flex-col bg-white shadow-lg overflow-hidden">
+        <!-- Header -->
+        <header class="blur-bg bg-white/80 sticky top-0 z-10 border-b border-gray-200/80 px-6 py-4">
+            <div class="flex justify-between items-center">
+                <h1 class="text-xl font-semibold gradient-text">Fitness Pro</h1>
+                <button class="p-2 rounded-full bg-gray-100">
+                    <i data-feather="user"></i>
+                </button>
             </div>
-            <div class="grid sm:grid-cols-2 gap-3">
-              <div>
-                <label class="text-xs text-white/70">Продукт</label>
-                <input id="foodName" class="field w-full mt-1 p-3 rounded-xl" placeholder="например, куриная грудка" />
-              </div>
-              <div>
-                <label class="text-xs text-white/70">Граммы</label>
-                <input id="foodGrams" type="number" min="1" class="field w-full mt-1 p-3 rounded-xl" placeholder="100" />
-              </div>
-              <div class="sm:col-span-2 grid sm:grid-cols-2 gap-3">
-                <div>
-                  <label class="text-xs text-white/70">Или выберите из базы</label>
-                  <select id="foodSelect" class="field w-full mt-1 p-3 rounded-xl"></select>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto pb-20">
+            <!-- Dashboard Sections -->
+            <div id="dashboard" class="px-6 py-4">
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-4 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-gray-500">Калории</p>
+                                <h3 class="text-xl font-semibold">1,850</h3>
+                                <p class="text-xs text-gray-500">из 2,200</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                                <i data-feather="activity" class="text-blue-500"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-br from-green-50 to-teal-50 rounded-2xl p-4 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-gray-500">Белки</p>
+                                <h3 class="text-xl font-semibold">120г</h3>
+                                <p class="text-xs text-gray-500">из 150г</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                                <i data-feather="egg" class="text-green-500"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-4 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-gray-500">Вода</p>
+                                <h3 class="text-xl font-semibold">1.5л</h3>
+                                <p class="text-xs text-gray-500">из 2л</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center">
+                                <i data-feather="droplet" class="text-yellow-500"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <button id="addFood" class="mt-6 sm:mt-auto bg-gold-600 hover:bg-gold-500 transition rounded-xl px-4 py-3 font-semibold shadow-glow">Добавить</button>
-              </div>
+
+                <!-- Quick Actions -->
+                <div class="mb-6">
+                    <h2 class="text-lg font-semibold mb-3">Быстрые действия</h2>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="showFoodModal()" class="bg-blue-500 text-white rounded-xl p-4 flex items-center justify-center flex-col">
+                            <i data-feather="plus-circle" class="w-6 h-6 mb-2"></i>
+                            <span class="text-sm">Добавить еду</span>
+                        </button>
+                        <button onclick="showWorkoutModal()" class="bg-purple-500 text-white rounded-xl p-4 flex items-center justify-center flex-col">
+                            <i data-feather="activity" class="w-6 h-6 mb-2"></i>
+                            <span class="text-sm">Тренировка</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Today's Meals -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-lg font-semibold">Сегодняшний рацион</h2>
+                        <button class="text-blue-500 text-sm">Все</button>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="bg-gray-50 rounded-xl p-4 flex items-center">
+                            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                                <i data-feather="coffee" class="text-green-500"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-medium">Завтрак</h3>
+                                <p class="text-xs text-gray-500">Овсянка, банан, кофе</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-medium">450 ккал</p>
+                                <p class="text-xs text-gray-500">8:30</p>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-4 flex items-center">
+                            <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mr-3">
+                                <i data-feather="sun" class="text-yellow-500"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-medium">Обед</h3>
+                                <p class="text-xs text-gray-500">Гречка, курица, овощи</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-medium">650 ккал</p>
+                                <p class="text-xs text-gray-500">13:15</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Chart -->
+                <div class="bg-white rounded-xl p-4 shadow-sm mb-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-lg font-semibold">Прогресс</h2>
+                        <select class="text-sm bg-gray-100 rounded-lg px-2 py-1">
+                            <option>Неделя</option>
+                            <option>Месяц</option>
+                            <option>Год</option>
+                        </select>
+                    </div>
+                    <div class="h-40">
+                        <canvas id="progressChart"></canvas>
+                    </div>
+                </div>
             </div>
 
-            <!-- Manual per100 toggle -->
-            <details class="mt-3">
-              <summary class="text-xs text-white/70 cursor-pointer">Ввести ккал/БЖУ вручную</summary>
-              <div class="grid grid-cols-4 gap-2 mt-2">
-                <input id="mK" type="number" min="0" placeholder="ккал/100г" class="field rounded-xl p-2 text-sm" />
-                <input id="mP" type="number" min="0" placeholder="Б/100г" class="field rounded-xl p-2 text-sm" />
-                <input id="mF" type="number" min="0" placeholder="Ж/100г" class="field rounded-xl p-2 text-sm" />
-                <input id="mC" type="number" min="0" placeholder="У/100г" class="field rounded-xl p-2 text-sm" />
-              </div>
-            </details>
-
-            <p class="text-[11px] text-white/50 mt-2">*Запрос уходит в OpenFoodFacts; при отсутствии ответа используется локальная база или ручной ввод.</p>
-          </div>
-
-          <!-- Wish calc -->
-          <div class="rounded-xl bg-white/5 p-4">
-            <h3 class="font-semibold mb-2 tracking-tight">Сколько можно съесть?</h3>
-            <div class="grid gap-2">
-              <input id="wishFood" class="field w-full p-3 rounded-xl" placeholder="например, шоколад" />
-              <div class="grid grid-cols-2 gap-2">
-                <input id="wishKcalPer100" type="number" class="field w-full p-3 rounded-xl" placeholder="ккал/100г (если знаете)" />
-                <button id="calcWish" class="bg-white/10 hover:bg-white/20 rounded-xl px-4 py-3">Рассчитать граммы</button>
-              </div>
-              <div class="text-sm text-white/80" id="wishResult">—</div>
+            <!-- Nutrition Section -->
+            <div id="nutrition" class="hidden px-6 py-4">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold">Питание</h2>
+                    <button onclick="showFoodModal()" class="bg-blue-500 text-white p-2 rounded-full">
+                        <i data-feather="plus"></i>
+                    </button>
+                </div>
+                
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-medium">Сегодня</h3>
+                        <p class="text-sm text-gray-500">1,850 / 2,200 ккал</p>
+                    </div>
+                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-blue-400 to-purple-500 rounded-full" style="width: 84%"></div>
+                    </div>
+                    <div class="grid grid-cols-4 gap-2 mt-2 text-xs text-center">
+                        <div>
+                            <p class="font-medium">Белки</p>
+                            <p class="text-gray-500">120г</p>
+                        </div>
+                        <div>
+                            <p class="font-medium">Жиры</p>
+                            <p class="text-gray-500">65г</p>
+                        </div>
+                        <div>
+                            <p class="font-medium">Углеводы</p>
+                            <p class="text-gray-500">210г</p>
+                        </div>
+                        <div>
+                            <p class="font-medium">Вода</p>
+                            <p class="text-gray-500">1.5л</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-medium">Завтрак</h3>
+                            <p class="text-sm text-blue-500">450 ккал</p>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <p class="text-sm">Овсянка</p>
+                                <p class="text-sm text-gray-500">150г • 300 ккал</p>
+                            </div>
+                            <div class="flex justify-between">
+                                <p class="text-sm">Банан</p>
+                                <p class="text-sm text-gray-500">1 шт • 100 ккал</p>
+                            </div>
+                            <div class="flex justify-between">
+                                <p class="text-sm">Кофе</p>
+                                <p class="text-sm text-gray-500">250мл • 50 ккал</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-medium">Обед</h3>
+                            <p class="text-sm text-blue-500">650 ккал</p>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <p class="text-sm">Гречка</p>
+                                <p class="text-sm text-gray-500">150г • 250 ккал</p>
+                            </div>
+                            <div class="flex justify-between">
+                                <p class="text-sm">Куриная грудка</p>
+                                <p class="text-sm text-gray-500">150г • 250 ккал</p>
+                            </div>
+                            <div class="flex justify-between">
+                                <p class="text-sm">Овощной салат</p>
+                                <p class="text-sm text-gray-500">100г • 50 ккал</p>
+                            </div>
+                            <div class="flex justify-between">
+                                <p class="text-sm">Оливковое масло</p>
+                                <p class="text-sm text-gray-500">10г • 100 ккал</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
+
+            <!-- Workouts Section -->
+            <div id="workouts" class="hidden px-6 py-4">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold">Тренировки</h2>
+                    <button onclick="showWorkoutModal()" class="bg-purple-500 text-white p-2 rounded-full">
+                        <i data-feather="plus"></i>
+                    </button>
+                </div>
+                
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-medium">Сегодняшняя тренировка</h3>
+                        <p class="text-sm text-purple-500">Грудь & Трицепс</p>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-4 shadow-sm">
+                        <div class="flex items-center mb-3">
+                            <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mr-3">
+                                <i data-feather="activity" class="text-purple-500"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-medium">Силовая тренировка</h3>
+                                <p class="text-xs text-gray-500">Длительность: 45 мин</p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex items-start">
+                                <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center mr-2 mt-1 shadow-sm">
+                                    <span class="text-xs font-medium">1</span>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-medium">Жим штанги лежа</p>
+                                    <p class="text-xs text-gray-500">4 подхода × 8-12 повторений</p>
+                                    <button class="text-xs text-purple-500 mt-1 flex items-center">
+                                        <i data-feather="play-circle" class="w-3 h-3 mr-1"></i>
+                                        Смотреть технику
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center mr-2 mt-1 shadow-sm">
+                                    <span class="text-xs font-medium">2</span>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-medium">Разводка гантелей</p>
+                                    <p class="text-xs text-gray-500">3 подхода × 12-15 повторений</p>
+                                    <button class="text-xs text-purple-500 mt-1 flex items-center">
+                                        <i data-feather="play-circle" class="w-3 h-3 mr-1"></i>
+                                        Смотреть технику
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center mr-2 mt-1 shadow-sm">
+                                    <span class="text-xs font-medium">3</span>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-medium">Отжимания на брусьях</p>
+                                    <p class="text-xs text-gray-500">3 подхода × 10-12 повторений</p>
+                                    <button class="text-xs text-purple-500 mt-1 flex items-center">
+                                        <i data-feather="play-circle" class="w-3 h-3 mr-1"></i>
+                                        Смотреть технику
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="w-full mt-4 bg-purple-500 text-white py-2 rounded-lg text-sm font-medium">
+                            Начать тренировку
+                        </button>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="font-medium mb-3">Рекомендации</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-gray-50 rounded-xl p-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mb-2 mx-auto">
+                                <i data-feather="zap" class="text-blue-500"></i>
+                            </div>
+                            <p class="text-xs text-center">Интервальная тренировка</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-3">
+                            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mb-2 mx-auto">
+                                <i data-feather="home" class="text-green-500"></i>
+                            </div>
+                            <p class="text-xs text-center">Домашний комплекс</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-3">
+                            <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mb-2 mx-auto">
+                                <i data-feather="target" class="text-yellow-500"></i>
+                            </div>
+                            <p class="text-xs text-center">На пресс</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-3">
+                            <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mb-2 mx-auto">
+                                <i data-feather="trending-up" class="text-red-500"></i>
+                            </div>
+                            <p class="text-xs text-center">На массу</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Section -->
+            <div id="profile" class="hidden px-6 py-4">
+                <div class="flex flex-col items-center mb-6">
+                    <div class="w-20 h-20 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center mb-3">
+                        <span class="text-white text-2xl font-bold">А</span>
+                    </div>
+                    <h2 class="text-xl font-semibold">Алексей</h2>
+                    <p class="text-sm text-gray-500">28 лет, мужчина</p>
+                </div>
+                
+                <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                    <h3 class="font-medium mb-3">Цели</h3>
+                    <div class="flex justify-between items-center mb-2">
+                        <p class="text-sm">Тип тренировок</p>
+                        <p class="text-sm font-medium">Набор массы</p>
+                    </div>
+                    <div class="flex justify-between items-center mb-2">
+                        <p class="text-sm">Место тренировок</p>
+                        <p class="text-sm font-medium">Зал</p>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <p class="text-sm">Уровень</p>
+                        <p class="text-sm font-medium">Средний</p>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                    <h3 class="font-medium mb-3">Показатели</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <p class="text-sm">Вес</p>
+                                <p class="text-sm font-medium">78 кг</p>
+                            </div>
+                            <div class="h-1 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full bg-blue-500 rounded-full" style="width: 70%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <p class="text-sm">Рост</p>
+                                <p class="text-sm font-medium">182 см</p>
+                            </div>
+                            <div class="h-1 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full bg-green-500 rounded-full" style="width: 90%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <p class="text-sm">ИМТ</p>
+                                <p class="text-sm font-medium">23.5</p>
+                            </div>
+                            <div class="h-1 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full bg-yellow-500 rounded-full" style="width: 50%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <button class="w-full bg-white border border-gray-200 rounded-lg py-3 px-4 flex items-center justify-between">
+                        <span class="font-medium">Настройки</span>
+                        <i data-feather="chevron-right" class="text-gray-400"></i>
+                    </button>
+                    <button class="w-full bg-white border border-gray-200 rounded-lg py-3 px-4 flex items-center justify-between">
+                        <span class="font-medium">Подписка</span>
+                        <i data-feather="chevron-right" class="text-gray-400"></i>
+                    </button>
+                    <button class="w-full bg-white border border-gray-200 rounded-lg py-3 px-4 flex items-center justify-between">
+                        <span class="font-medium">Помощь</span>
+                        <i data-feather="chevron-right" class="text-gray-400"></i>
+                    </button>
+                    <button class="w-full bg-white border border-gray-200 rounded-lg py-3 px-4 flex items-center justify-between text-red-500">
+                        <span class="font-medium">Выйти</span>
+                        <i data-feather="log-out" class="text-red-400"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="blur-bg bg-white/80 border-t border-gray-200/80 fixed bottom-0 w-full max-w-md flex justify-around py-3">
+            <button onclick="showSection('dashboard')" class="flex flex-col items-center text-blue-500">
+                <i data-feather="home"></i>
+                <span class="text-xs mt-1">Главная</span>
+            </button>
+            <button onclick="showSection('nutrition')" class="flex flex-col items-center text-gray-500">
+                <i data-feather="pie-chart"></i>
+                <span class="text-xs mt-1">Питание</span>
+            </button>
+            <button onclick="showSection('workouts')" class="flex flex-col items-center text-gray-500">
+                <i data-feather="activity"></i>
+                <span class="text-xs mt-1">Тренировки</span>
+            </button>
+            <button onclick="showSection('profile')" class="flex flex-col items-center text-gray-500">
+                <i data-feather="user"></i>
+                <span class="text-xs mt-1">Профиль</span>
+            </button>
+        </nav>
+
+        <!-- Add Food Modal -->
+        <div id="foodModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 hidden">
+            <div class="bg-white rounded-2xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+                <div class="sticky top-0 bg-white px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <h2 class="text-xl font-semibold">Добавить еду</h2>
+                    <button onclick="hideFoodModal()" class="text-gray-500">
+                        <i data-feather="x"></i>
+                    </button>
+                </div>
+                
+                <div class="p-6">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Прием пищи</label>
+                        <select class="w-full bg-gray-100 rounded-lg px-4 py-2">
+                            <option>Завтрак</option>
+                            <option>Обед</option>
+                            <option>Ужин</option>
+                            <option>Перекус</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Продукт</label>
+                        <div class="relative">
+                            <input type="text" placeholder="Начните вводить название" class="w-full bg-gray-100 rounded-lg px-4 py-2 pl-10">
+                            <i data-feather="search" class="absolute left-3 top-2.5 text-gray-400"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Количество (г)</label>
+                        <input type="number" class="w-full bg-gray-100 rounded-lg px-4 py-2" value="100">
+                    </div>
+                    
+                    <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                        <div class="flex justify-between mb-2">
+                            <p class="text-sm">Калории</p>
+                            <p class="text-sm font-medium">350 ккал</p>
+                        </div>
+                        <div class="flex justify-between">
+                            <p class="text-sm">Белки/Жиры/Углеводы</p>
+                            <p class="text-sm font-medium">25/10/40 г</p>
+                        </div>
+                    </div>
+                    
+                    <button class="w-full bg-blue-500 text-white py-3 rounded-lg font-medium">
+                        Добавить
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <!-- Today list -->
-        <div class="rounded-xl bg-white/5 p-4">
-          <div class="flex items-center justify-between mb-2">
-            <h3 class="font-semibold tracking-tight">Сегодняшние приёмы пищи</h3>
-            <div class="flex items-center gap-3">
-              <button id="copyToday" class="text-xs text-white/70">Дублировать на завтра</button>
-              <button id="clearToday" class="text-xs text-red-300">Очистить день</button>
+        <!-- Add Workout Modal -->
+        <div id="workoutModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 hidden">
+            <div class="bg-white rounded-2xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+                <div class="sticky top-0 bg-white px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <h2 class="text-xl font-semibold">Добавить тренировку</h2>
+                    <button onclick="hideWorkoutModal()" class="text-gray-500">
+                        <i data-feather="x"></i>
+                    </button>
+                </div>
+                
+                <div class="p-6">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Тип тренировки</label>
+                        <select class="w-full bg-gray-100 rounded-lg px-4 py-2">
+                            <option>Силовая</option>
+                            <option>Кардио</option>
+                            <option>Круговая</option>
+                            <option>Растяжка</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Группа мышц</label>
+                        <select class="w-full bg-gray-100 rounded-lg px-4 py-2">
+                            <option>Грудь</option>
+                            <option>Спина</option>
+                            <option>Ноги</option>
+                            <option>Плечи</option>
+                            <option>Руки</option>
+                            <option>Пресс</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Упражнение</label>
+                        <div class="relative">
+                            <input type="text" placeholder="Начните вводить название" class="w-full bg-gray-100 rounded-lg px-4 py-2 pl-10">
+                            <i data-feather="search" class="absolute left-3 top-2.5 text-gray-400"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-3 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Подходы</label>
+                            <input type="number" class="w-full bg-gray-100 rounded-lg px-2 py-1 text-center" value="3">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Повторения</label>
+                            <input type="text" class="w-full bg-gray-100 rounded-lg px-2 py-1 text-center" value="8-12">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Вес (кг)</label>
+                            <input type="number" class="w-full bg-gray-100 rounded-lg px-2 py-1 text-center" value="20">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Описание</label>
+                        <textarea class="w-full bg-gray-100 rounded-lg px-4 py-2 h-20" placeholder="Заметки..."></textarea>
+                    </div>
+                    
+                    <button class="w-full bg-purple-500 text-white py-3 rounded-lg font-medium">
+                        Сохранить
+                    </button>
+                </div>
             </div>
-          </div>
-          <div id="meals" class="grid gap-2"></div>
         </div>
-      </div>
-
-      <!-- Workouts tab -->
-      <div id="tab-workouts" class="p-5 grid gap-5 hide">
-        <div class="rounded-xl bg-white/5 p-4">
-          <div class="flex items-center justify-between gap-3 mb-3">
-            <h3 class="font-semibold tracking-tight">Программа тренировки</h3>
-            <div class="text-xs text-white/70">Расположение: <span id="locLabel">—</span></div>
-          </div>
-          <div id="workoutPlan" class="grid md:grid-cols-2 gap-3"></div>
-          <p class="text-[11px] text-white/50 mt-2">Ссылки «Видео» открывают поиск YouTube по упражнению.</p>
-        </div>
-        <div class="rounded-xl bg-white/5 p-4 grid sm:grid-cols-3 gap-3">
-          <div>
-            <label class="text-xs text-white/70">Минут тренировки</label>
-            <input id="mins" type="number" min="0" class="field mt-1 w-full p-3 rounded-xl" placeholder="30" />
-          </div>
-          <div>
-            <label class="text-xs text-white/70">Интенсивность</label>
-            <select id="intensity" class="field mt-1 w-full p-3 rounded-xl">
-              <option value="light">Лёгкая</option>
-              <option value="moderate">Средняя</option>
-              <option value="vigorous">Высокая</option>
-            </select>
-          </div>
-          <button id="addBurn" class="sm:self-end bg-gold-600 hover:bg-gold-500 transition rounded-xl px-4 py-3 font-semibold shadow-glow">Добавить расход</button>
-        </div>
-        <div id="burnLog" class="rounded-xl bg-white/5 p-4 grid gap-2"></div>
-      </div>
-
-      <!-- Profile tab -->
-      <div id="tab-profile" class="p-5 grid gap-5 hide">
-        <div class="rounded-xl bg-white/5 p-4 grid md:grid-cols-2 gap-4">
-          <div class="grid gap-2">
-            <h3 class="font-semibold mb-1 tracking-tight">Параметры</h3>
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="text-xs text-white/70">Пол</label>
-                <select id="gender" class="field w-full mt-1 p-3 rounded-xl">
-                  <option value="male">Мужчина</option>
-                  <option value="female">Женщина</option>
-                </select>
-              </div>
-              <div>
-                <label class="text-xs text-white/70">Возраст</label>
-                <input id="age" type="number" min="10" max="100" class="field w-full mt-1 p-3 rounded-xl" placeholder="28" />
-              </div>
-              <div>
-                <label class="text-xs text-white/70">Рост (см)</label>
-                <input id="height" type="number" min="120" max="230" class="field w-full mt-1 p-3 rounded-xl" placeholder="175" />
-              </div>
-              <div>
-                <label class="text-xs text-white/70">Вес (кг)</label>
-                <input id="weight" type="number" min="30" max="250" class="field w-full mt-1 p-3 rounded-xl" placeholder="75" />
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="text-xs text-white/70">Цель</label>
-                <select id="goal" class="field w-full mt-1 p-3 rounded-xl">
-                  <option value="lose">Похудеть</option>
-                  <option value="maintain">Поддерживать</option>
-                  <option value="gain">Набрать массу</option>
-                </select>
-              </div>
-              <div>
-                <label class="text-xs text-white/70">Где тренируетесь?</label>
-                <select id="location" class="field w-full mt-1 p-3 rounded-xl">
-                  <option value="home">Дома</option>
-                  <option value="gym">В зале</option>
-                </select>
-              </div>
-            </div>
-            <div>
-              <label class="text-xs text-white/70">Активность</label>
-              <select id="activity" class="field w-full mt-1 p-3 rounded-xl">
-                <option value="1.2">Минимальная</option>
-                <option value="1.375">Лёгкая (1–3 трен/нед)</option>
-                <option value="1.55">Средняя (3–5)</option>
-                <option value="1.725">Высокая (6+)</option>
-              </select>
-            </div>
-            <button id="saveProfile" class="mt-2 bg-gold-600 hover:bg-gold-500 transition rounded-xl px-4 py-3 font-semibold shadow-glow">Сохранить профиль</button>
-          </div>
-
-          <div class="grid gap-2">
-            <h3 class="font-semibold mb-1 tracking-tight">Ваши расчёты</h3>
-            <div class="rounded-xl bg-white/5 p-4 grid gap-2 text-sm">
-              <div>Базовый метаболизм (Миффлин—Сан Жеор): <span id="bmr">—</span> ккал</div>
-              <div>Поддержание (TDEE): <span id="tdee">—</span> ккал</div>
-              <div>Дневной лимит по цели: <span id="limit">—</span> ккал</div>
-              <div>Макро ориентиры: <span id="macros">—</span></div>
-            </div>
-            <div class="rounded-xl bg-white/5 p-4">
-              <h4 class="font-semibold mb-2 tracking-tight">Экспорт / Импорт</h4>
-              <div class="grid sm:grid-cols-2 gap-2">
-                <button id="exportBtn" class="bg-white/10 hover:bg-white/20 rounded-xl px-4 py-2">Экспорт JSON</button>
-                <label class="bg-white/10 hover:bg-white/20 rounded-xl px-4 py-2 text-center cursor-pointer">
-                  Импорт JSON <input type="file" id="importFile" accept="application/json" class="hidden" />
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- History -->
-        <div class="rounded-2xl overflow-hidden">
-          <table class="w-full text-sm">
-            <thead class="bg-white/10">
-              <tr>
-                <th class="text-left p-3">Дата</th>
-                <th class="text-left p-3">Ккал</th>
-                <th class="text-left p-3">Белки</th>
-                <th class="text-left p-3">Жиры</th>
-                <th class="text-left p-3">Углеводы</th>
-              </tr>
-            </thead>
-            <tbody id="history" class="bg-white/5"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Bottom nav -->
-  <footer class="fixed bottom-0 inset-x-0 md:static md:max-w-6xl md:mx-auto md:px-4 md:pb-6">
-    <div class="m-3 md:m-0 glass elev rounded-2xl grid grid-cols-3 overflow-hidden">
-      <button class="py-3 text-center tab-btn tab-active" data-tab="food">🍽️ Питание</button>
-      <button class="py-3 text-center tab-btn" data-tab="workouts">🏋️ Тренировки</button>
-      <button class="py-3 text-center tab-btn" data-tab="profile">👤 Профиль</button>
     </div>
-  </footer>
 
-  <script>
-    // ========= Utilities =========
-    const clampNum = (v, min, max) => Math.min(max, Math.max(min, Number(v||0)));
-    const fmt = (n) => Math.round(Number(n||0));
-    const pad = (n) => String(n).padStart(2,'0');
-    const todayKey = () => { // локальная дата, не UTC
-      const d = new Date();
-      const y = d.getFullYear();
-      const m = pad(d.getMonth()+1);
-      const day = pad(d.getDate());
-      return `${y}-${m}-${day}`;
-    };
-
-    // ========= Data (fallback local DB) =========
-    const LOCAL_DB = [
-      { name: 'Куриная грудка варёная', kcal: 165, protein: 31, fat: 3.6, carbs: 0 },
-      { name: 'Рис белый варёный', kcal: 130, protein: 2.7, fat: 0.3, carbs: 28 },
-      { name: 'Гречка варёная', kcal: 110, protein: 4.5, fat: 1.3, carbs: 20 },
-      { name: 'Яйцо куриное', kcal: 155, protein: 13, fat: 11, carbs: 1.1 },
-      { name: 'Творог 5%', kcal: 121, protein: 17, fat: 5, carbs: 2.7 },
-      { name: 'Овсянка на воде', kcal: 71, protein: 2.5, fat: 1.5, carbs: 12 },
-      { name: 'Авокадо', kcal: 160, protein: 2, fat: 15, carbs: 9 },
-      { name: 'Яблоко', kcal: 52, protein: 0.3, fat: 0.2, carbs: 14 },
-      { name: 'Банан', kcal: 89, protein: 1.1, fat: 0.3, carbs: 23 },
-      { name: 'Говядина постная', kcal: 187, protein: 26, fat: 9, carbs: 0 },
-      { name: 'Лосось', kcal: 208, protein: 20, fat: 13, carbs: 0 },
-      { name: 'Творог зернёный', kcal: 98, protein: 11, fat: 4.3, carbs: 3.4 },
-      { name: 'Сыр творожный', kcal: 250, protein: 9, fat: 24, carbs: 3 },
-      { name: 'Шоколад тёмный 70%', kcal: 600, protein: 7.8, fat: 43, carbs: 46 },
-    ];
-
-    const EXERCISES = {
-      home: {
-        lose: [
-          { muscle: 'Ноги/ягодицы', name: 'Приседания с весом своего тела', sets: '3×15', note: 'Контроль темпа' },
-          { muscle: 'Грудь/плечи/трицепс', name: 'Отжимания от пола', sets: '3×10–15', note: 'Колени при необходимости' },
-          { muscle: 'Спина/кор', name: 'Планка', sets: '3×40–60 сек', note: 'Живот в тонусе' },
-          { muscle: 'Кардио', name: 'Скакалка или быстрые шаги на месте', sets: '10–20 мин', note: 'Пульс 60–70% МЧС' },
-        ],
-        maintain: [
-          { muscle: 'Ноги', name: 'Выпады вперёд', sets: '3×12/нога', note: '' },
-          { muscle: 'Спина', name: 'Тяга эластичной ленты', sets: '3×12–15', note: 'Сводим лопатки' },
-          { muscle: 'Пресс', name: 'Скручивания', sets: '3×20', note: '' },
-          { muscle: 'Кардио', name: 'Чередование бег/ходьба', sets: '20 мин', note: '' },
-        ],
-        gain: [
-          { muscle: 'Грудь', name: 'Отжимания с узкой постановкой', sets: '4×10–12', note: 'Медленный негатив' },
-          { muscle: 'Ноги', name: 'Болгарские сплит-приседания', sets: '4×10/нога', note: '' },
-          { muscle: 'Спина', name: 'Подтягивания/автоподтягивания', sets: '4×макс', note: 'Резинка при необходимости' },
-          { muscle: 'Плечи', name: 'Жим гантелей вверх (домашние)', sets: '4×12', note: '' },
-        ]
-      },
-      gym: {
-        lose: [
-          { muscle: 'Ноги', name: 'Жим ногами', sets: '4×12–15', note: '' },
-          { muscle: 'Грудь', name: 'Жим лёжа', sets: '4×8–10', note: '' },
-          { muscle: 'Спина', name: 'Тяга верхнего блока', sets: '4×10–12', note: '' },
-          { muscle: 'Кардио', name: 'Эллипсоид', sets: '20–30 мин', note: '60–70% МЧС' },
-        ],
-        maintain: [
-          { muscle: 'Плечи', name: 'Жим гантелей сидя', sets: '3×10–12', note: '' },
-          { muscle: 'Спина', name: 'Тяга горизонтального блока', sets: '3×10–12', note: '' },
-          { muscle: 'Пресс', name: 'Подъём колен в висе', sets: '3×12–15', note: '' },
-          { muscle: 'Ноги', name: 'Разгибания ног в тренажёре', sets: '3×12–15', note: '' },
-        ],
-        gain: [
-          { muscle: 'Грудь', name: 'Жим штанги лёжа', sets: '5×5–8', note: 'Прогрессия нагрузки' },
-          { muscle: 'Спина', name: 'Тяга штанги в наклоне', sets: '5×5–8', note: '' },
-          { muscle: 'Ноги', name: 'Приседания со штангой', sets: '5×5', note: '' },
-          { muscle: 'Плечи', name: 'Жим штанги стоя', sets: '4×6–8', note: '' },
-        ]
-      }
-    };
-
-    // ========= State & Storage =========
-    const tg = window.Telegram?.WebApp;
-    let UID = 'anon';
-    if (tg && tg.initDataUnsafe?.user) {
-      UID = String(tg.initDataUnsafe.user.id);
-      tg.expand();
-      document.getElementById('hello').textContent = `Привет, ${tg.initDataUnsafe.user.first_name || 'друг'}!`;
-      tg.MainButton.setParams({ text: 'Сохранить профиль', is_visible: false });
-      tg.onEvent('mainButtonClicked', () => document.getElementById('saveProfile').click());
-      document.body.style.background = '#0b0f14';
-    }
-
-    const storeKey = (k) => `fitbalance:${UID}:${k}`;
-    const read = (k, v=null) => { try { return JSON.parse(localStorage.getItem(storeKey(k))) ?? v } catch { return v } };
-    const write = (k, v) => localStorage.setItem(storeKey(k), JSON.stringify(v));
-
-    const state = {
-      profile: read('profile', { gender: 'male', age: 28, height: 175, weight: 75, goal: 'maintain', activity: 1.375, location: 'home' }),
-      meals: read('meals', {}), // map date -> [items]
-      burns: read('burns', {}), // map date -> [items]
-      kcalLimit: 0,
-      cache: read('cache', { off: {} }) // { off: { queryLower: { name, per100 } } }
-    };
-
-    // ========= Helpers =========
-    function calcBMR({ gender, age, height, weight }) {
-      return gender === 'male' ? 10*weight + 6.25*height - 5*age + 5 : 10*weight + 6.25*height - 5*age - 161;
-    }
-    const goalOffset = (goal) => goal==='lose' ? -400 : goal==='gain' ? 300 : 0; // мягкая рекомендация
-    function macroTargets(weight, goal) {
-      const p = goal==='gain' ? 1.8 : goal==='lose' ? 1.6 : 1.6; // g/kg
-      const fat = 0.8; // g/kg
-      return { protein: fmt(weight*p), fat: fmt(weight*fat) };
-    }
-
-    function foodsToOptions() {
-      const sel = document.getElementById('foodSelect');
-      sel.innerHTML = '<option value="">— выбрать продукт —</option>' + LOCAL_DB.map((f,i)=>`<option value="${i}">${f.name} — ${f.kcal} ккал/100г</option>`).join('');
-    }
-
-    function sumDay(items) { return items?.reduce((a,b)=>a+Number(b.kcal||0),0)||0 }
-    function sumMacros(items, k) { return items?.reduce((a,b)=>a+Number(b[k]||0),0)||0 }
-
-    function renderMeals() {
-      const d = todayKey();
-      const box = document.getElementById('meals'); box.innerHTML = '';
-      const items = state.meals[d]||[];
-      if (!items.length) { box.innerHTML = '<div class="text-white/60 text-sm">Нет записей. Добавьте продукт.</div>'; return }
-      items.forEach((it, idx)=>{
-        const row = document.createElement('div');
-        row.className = 'flex items-center justify-between bg-white/5 rounded-xl p-3';
-        row.innerHTML = `<div><div class="font-medium">${it.name}</div><div class="text-xs text-white/60">${fmt(it.grams)} г • ${fmt(it.kcal)} ккал • Б:${fmt(it.protein)} Ж:${fmt(it.fat)} У:${fmt(it.carbs)}</div></div>
-        <div class="flex items-center gap-3">
-          <button class="text-xs" data-act="-50" title="-50 г">−50г</button>
-          <button class="text-xs" data-act="+50" title="+50 г">+50г</button>
-          <button class="text-xs text-red-300" data-i="${idx}">Удалить</button>
-        </div>`;
-        row.querySelector('[data-i]')?.addEventListener('click', (e)=>{ (state.meals[d]||[]).splice(Number(e.target.dataset.i),1); write('meals', state.meals); renderMeals(); renderEnergy(); });
-        row.querySelectorAll('[data-act]')?.forEach(btn=>{
-          btn.addEventListener('click', (e)=>{
-            const sign = String(e.target.dataset.act);
-            const delta = sign.startsWith('-') ? -50 : 50;
-            it.grams = Math.max(1, it.grams + delta);
-            const factor = it.grams/100;
-            it.kcal = it.per100.kcal*factor;
-            it.protein = (it.per100.protein||0)*factor;
-            it.fat = (it.per100.fat||0)*factor;
-            it.carbs = (it.per100.carbs||0)*factor;
-            write('meals', state.meals); renderMeals(); renderEnergy();
-          })
-        });
-        box.appendChild(row);
-      })
-    }
-
-    function renderBurns() {
-      const d = todayKey();
-      const box = document.getElementById('burnLog'); box.innerHTML = '';
-      const items = state.burns[d]||[];
-      if (!items.length) { box.innerHTML = '<div class="text-white/60 text-sm">Нет записей тренировки за сегодня.</div>'; return }
-      items.forEach((it, idx)=>{
-        const row = document.createElement('div');
-        row.className = 'flex items-center justify-between bg-white/5 rounded-xl p-3';
-        row.innerHTML = `<div><div class="font-medium">${it.intensity} • ${fmt(it.mins)} мин</div><div class="text-xs text-white/60">~ ${fmt(it.kcal)} ккал</div></div>
-        <button class="text-xs text-red-300" data-i="${idx}">Удалить</button>`;
-        row.querySelector('button').onclick = (e)=>{ (state.burns[d]||[]).splice(Number(e.target.dataset.i),1); write('burns', state.burns); renderBurns(); renderEnergy(); };
-        box.appendChild(row);
-      })
-    }
-
-    function renderEnergy() {
-      const prof = state.profile;
-      const bmr = calcBMR(prof), tdee = bmr * Number(prof.activity);
-      const limit = tdee + goalOffset(prof.goal);
-      state.kcalLimit = limit; document.getElementById('kcalLimit').textContent = fmt(limit);
-      const eaten = sumDay(state.meals[todayKey()]);
-      const burned = sumDay(state.burns[todayKey()]);
-      const net = eaten - burned;
-      const remain = Math.max(0, limit - net);
-      document.getElementById('kcalEaten').textContent = fmt(eaten);
-      document.getElementById('kcalBurned').textContent = fmt(burned);
-      document.getElementById('kcalNet').textContent = fmt(net);
-      document.getElementById('kcalRemain').textContent = `${fmt(remain)} ккал`;
-      document.getElementById('goalBadge').textContent = `Цель: ${prof.goal==='lose'?'Похудение':prof.goal==='gain'?'Масса':'Поддержание'}`;
-      // update wish helper live
-      const per100 = Number(document.getElementById('wishKcalPer100').value||0);
-      if (per100>0) {
-        const grams = Math.max(0, Math.floor((remain / per100) * 100));
-        document.getElementById('wishResult').textContent = grams?`Можно ~ ${grams} г, чтобы не превысить лимит.`:'—';
-      }
-      renderHistory();
-      renderWorkoutPlan();
-    }
-
-    function renderProfile() {
-      const p = state.profile;
-      document.getElementById('gender').value = p.gender;
-      document.getElementById('age').value = p.age;
-      document.getElementById('height').value = p.height;
-      document.getElementById('weight').value = p.weight;
-      document.getElementById('goal').value = p.goal;
-      document.getElementById('activity').value = String(p.activity);
-      document.getElementById('location').value = p.location;
-
-      const bmr = calcBMR(p);
-      const tdee = bmr * Number(p.activity);
-      const limit = tdee + goalOffset(p.goal);
-      const macros = macroTargets(p.weight, p.goal);
-      const carbs = Math.max(0, Math.round((limit - (macros.protein*4 + macros.fat*9))/4));
-      document.getElementById('bmr').textContent = fmt(bmr);
-      document.getElementById('tdee').textContent = fmt(tdee);
-      document.getElementById('limit').textContent = fmt(limit);
-      document.getElementById('macros').textContent = `Б:${macros.protein}г Ж:${macros.fat}г У:${carbs}г (ориентир)`;
-      document.getElementById('locLabel').textContent = p.location==='gym'?'зал':'дом';
-    }
-
-    function renderHistory() {
-      const tbody = document.getElementById('history'); tbody.innerHTML = '';
-      const allDays = Array.from(new Set([...Object.keys(state.meals), ...Object.keys(state.burns)])).sort();
-      const days = allDays.slice(-14); // последние 14 дней
-      days.forEach(d=>{
-        const meals = state.meals[d]||[];
-        const burns = state.burns[d]||[];
-        const kcal = (sumDay(meals) - sumDay(burns));
-        const p = sumMacros(meals,'protein');
-        const f = sumMacros(meals,'fat');
-        const c = sumMacros(meals,'carbs');
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="p-3 text-white/80">${d}</td><td class="p-3">${fmt(kcal)}</td><td class="p-3">${fmt(p)}</td><td class="p-3">${fmt(f)}</td><td class="p-3">${fmt(c)}</td>`;
-        tbody.appendChild(tr);
-      })
-    }
-
-    function renderWorkoutPlan() {
-      const wrap = document.getElementById('workoutPlan');
-      wrap.innerHTML = '';
-      const list = EXERCISES[state.profile.location][state.profile.goal];
-      list.forEach(ex => {
-        const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(ex.name + ' техника выполнения')}`;
-        const card = document.createElement('div');
-        card.className = 'bg-white/5 rounded-xl p-4';
-        card.innerHTML = `<div class="text-xs text-white/60">${ex.muscle}</div>
-          <div class="font-semibold">${ex.name}</div>
-          <div class="text-sm text-white/70">${ex.sets} ${ex.note?('• '+ex.note):''}</div>
-          <a class="inline-block mt-2 text-gold-300 underline" href="${url}" target="_blank" rel="noopener">Видео</a>`;
-        wrap.appendChild(card);
-      })
-    }
-
-    // ========= OpenFoodFacts =========
-    async function searchOpenFoodFacts(q) {
-      const key = q.trim().toLowerCase();
-      if (state.cache.off[key]) return state.cache.off[key];
-      try {
-        const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&search_simple=1&json=1&page_size=1`;
-        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-        if (!res.ok) throw new Error('http');
-        const data = await res.json();
-        const p = data.products?.[0];
-        if (!p) return null;
-        const nutr = p.nutriments || {};
-        const per100 = {
-          kcal: nutr['energy-kcal_100g'] ?? nutr['energy-kcal'] ?? (nutr['energy_100g']? nutr['energy_100g']/4.184 : null),
-          protein: nutr['proteins_100g'] ?? 0,
-          fat: nutr['fat_100g'] ?? 0,
-          carbs: nutr['carbohydrates_100g'] ?? 0,
-        };
-        if (!per100.kcal) return null;
-        const result = { name: p.product_name || q, per100 };
-        state.cache.off[key] = result; write('cache', state.cache);
-        return result;
-      } catch (e) { return null }
-    }
-
-    // ========= Meal / Burn adders =========
-    function addMealItem(name, grams, per100) {
-      const d = todayKey();
-      const list = state.meals[d] || (state.meals[d] = []);
-      const factor = grams/100;
-      const item = {
-        name, grams, per100,
-        kcal: per100.kcal*factor,
-        protein: (per100.protein||0)*factor,
-        fat: (per100.fat||0)*factor,
-        carbs: (per100.carbs||0)*factor,
-      };
-      list.push(item); write('meals', state.meals); renderMeals(); renderEnergy();
-    }
-
-    function addBurnItem(mins, intensity) {
-      const d = todayKey();
-      const list = state.burns[d] || (state.burns[d] = []);
-      const met = intensity==='light' ? 4 : intensity==='moderate' ? 6 : 8; // условный MET
-      const kcal = (met * state.profile.weight * (mins/60));
-      list.push({ mins, intensity, kcal }); write('burns', state.burns); renderBurns(); renderEnergy();
-    }
-
-    // ========= Events =========
-    document.addEventListener('DOMContentLoaded', () => {
-      foodsToOptions();
-      renderProfile();
-      renderMeals();
-      renderBurns();
-      renderEnergy();
-
-      // Tabs
-      document.querySelectorAll('.tab-btn').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-          document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('tab-active'));
-          btn.classList.add('tab-active');
-          const t = btn.dataset.tab;
-          document.getElementById('tab-food').classList.toggle('hide', t!=='food');
-          document.getElementById('tab-workouts').classList.toggle('hide', t!=='workouts');
-          document.getElementById('tab-profile').classList.toggle('hide', t!=='profile');
-        })
-      })
-
-      // Select from local DB
-      document.getElementById('foodSelect').addEventListener('change', e=>{
-        const i = e.target.value; if (i==='') return;
-        const f = LOCAL_DB[Number(i)];
-        document.getElementById('foodName').value = f.name;
-        document.getElementById('foodGrams').value = 100;
-        document.getElementById('mK').value = f.kcal; // автоподстановка для ручного блока
-        document.getElementById('mP').value = f.protein || 0;
-        document.getElementById('mF').value = f.fat || 0;
-        document.getElementById('mC').value = f.carbs || 0;
-      })
-
-      // Add food
-      document.getElementById('addFood').addEventListener('click', async ()=>{
-        const name = document.getElementById('foodName').value.trim();
-        let grams = clampNum(document.getElementById('foodGrams').value, 1, 5000);
-        if (!name || !grams) return alert('Укажите продукт и граммы');
-
-        // priority: manual per100 -> local db -> OFF API -> default
-        let per100 = null;
-        const mK = Number(document.getElementById('mK').value||0);
-        const mP = Number(document.getElementById('mP').value||0);
-        const mF = Number(document.getElementById('mF').value||0);
-        const mC = Number(document.getElementById('mC').value||0);
-        if (mK>0) per100 = { kcal: mK, protein: mP, fat: mF, carbs: mC };
-
-        if (!per100) {
-          // try local DB exact match or selected index
-          const sel = document.getElementById('foodSelect');
-          if (sel.value!=='') per100 = LOCAL_DB[Number(sel.value)];
-          if (!per100) per100 = LOCAL_DB.find(f=>f.name.toLowerCase()===name.toLowerCase());
-        }
-
-        if (!per100) { // try OFF
-          const res = await searchOpenFoodFacts(name);
-          if (res?.per100?.kcal) {
-            per100 = res.per100;
-            // also hint to wishKcal field if empty
-            if (!document.getElementById('wishKcalPer100').value) {
-              document.getElementById('wishKcalPer100').value = fmt(per100.kcal);
+    <script>
+        // Initialize
+        feather.replace();
+        AOS.init();
+        
+        // Show/Hide Sections
+        function showSection(sectionId) {
+            document.querySelectorAll('main > div').forEach(div => {
+                div.classList.add('hidden');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            
+            // Update active tab
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('text-blue-500');
+                btn.classList.add('text-gray-500');
+            });
+            
+            const activeBtn = Array.from(document.querySelectorAll('nav button')).find(btn => 
+                btn.getAttribute('onclick').includes(sectionId)
+            );
+            
+            if (activeBtn) {
+                activeBtn.classList.remove('text-gray-500');
+                activeBtn.classList.add('text-blue-500');
             }
-          }
         }
-
-        if (!per100) { per100 = { kcal: 100, protein: 0, fat: 0, carbs: 0 }; }
-        addMealItem(name, grams, per100);
-        document.getElementById('foodName').value='';
-        document.getElementById('foodGrams').value='';
-        document.getElementById('foodSelect').value='';
-        document.getElementById('mK').value=''; document.getElementById('mP').value=''; document.getElementById('mF').value=''; document.getElementById('mC').value='';
-      })
-
-      // Duplicate day to tomorrow
-      document.getElementById('copyToday').addEventListener('click', ()=>{
-        const d = todayKey();
-        const items = (state.meals[d]||[]).map(it=>({ ...it }));
-        if (!items.length) return alert('Нет записей для копирования');
-        const t = new Date(); t.setDate(t.getDate()+1);
-        const tomorrow = `${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`;
-        state.meals[tomorrow] = items; write('meals', state.meals);
-        alert('Скопировано на завтра'); renderHistory();
-      })
-
-      // Clear today
-      document.getElementById('clearToday').addEventListener('click', ()=>{
-        if (!confirm('Очистить сегодняшние записи?')) return;
-        state.meals[todayKey()] = []; write('meals', state.meals); renderMeals(); renderEnergy();
-      })
-
-      // Wish calc
-      document.getElementById('calcWish').addEventListener('click', ()=>{
-        const per100 = Number(document.getElementById('wishKcalPer100').value||0);
-        if (!per100) { alert('Укажите ккал/100г для оценки'); return }
-        const eaten = sumDay(state.meals[todayKey()]);
-        const burned = sumDay(state.burns[todayKey()]);
-        const remain = Math.max(0, state.kcalLimit - (eaten - burned));
-        const grams = Math.max(0, Math.floor((remain / per100) * 100));
-        document.getElementById('wishResult').textContent = grams?`Можно ~ ${grams} г, чтобы не превысить лимит.`:'—';
-      })
-
-      // Add burn
-      document.getElementById('addBurn').addEventListener('click', ()=>{
-        const mins = clampNum(document.getElementById('mins').value, 0, 300);
-        const intensity = document.getElementById('intensity').value;
-        if (!mins) return alert('Укажите минуты');
-        addBurnItem(mins, intensity);
-        document.getElementById('mins').value='';
-      })
-
-      // Save profile
-      const profileInputs = ['gender','age','height','weight','goal','activity','location'];
-      profileInputs.forEach(id=>{
-        document.getElementById(id).addEventListener('input', ()=>{
-          if (tg) tg.MainButton.show();
-        })
-      });
-
-      document.getElementById('saveProfile').addEventListener('click', ()=>{
-        state.profile = {
-          gender: document.getElementById('gender').value,
-          age: clampNum(document.getElementById('age').value, 10, 100),
-          height: clampNum(document.getElementById('height').value, 120, 230),
-          weight: clampNum(document.getElementById('weight').value, 30, 250),
-          goal: document.getElementById('goal').value,
-          activity: Number(document.getElementById('activity').value),
-          location: document.getElementById('location').value,
-        };
-        write('profile', state.profile);
-        if (tg) { tg.HapticFeedback.impactOccurred('light'); tg.showAlert('Профиль сохранён'); tg.MainButton.hide(); }
-        renderProfile(); renderEnergy();
-      })
-
-      // OFF search button
-      document.getElementById('scanOpenFoodFacts').addEventListener('click', async ()=>{
-        const q = prompt('Что ищем?'); if (!q) return;
-        const res = await searchOpenFoodFacts(q);
-        if (!res) { alert('Не найдено. Используйте локальную базу или введите ккал/100г вручную.'); return }
-        document.getElementById('foodName').value = res.name;
-        document.getElementById('foodGrams').value = 100;
-        document.getElementById('mK').value = fmt(res.per100.kcal);
-        document.getElementById('mP').value = fmt(res.per100.protein||0);
-        document.getElementById('mF').value = fmt(res.per100.fat||0);
-        document.getElementById('mC').value = fmt(res.per100.carbs||0);
-        alert(`${res.name}: ~${Math.round(res.per100.kcal)} ккал/100г`);
-      })
-
-      // Export / Import
-      document.getElementById('exportBtn').addEventListener('click', ()=>{
-        const data = { version: 1, profile: state.profile, meals: state.meals, burns: state.burns, cache: state.cache };
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob); a.download = `fitbalance-${UID}-${todayKey()}.json`; a.click();
-      })
-      document.getElementById('importFile').addEventListener('change', async (e)=>{
-        const file = e.target.files?.[0]; if (!file) return;
-        const text = await file.text();
-        try {
-          const data = JSON.parse(text);
-          if (data.profile) state.profile = data.profile;
-          if (data.meals) state.meals = data.meals;
-          if (data.burns) state.burns = data.burns;
-          if (data.cache) state.cache = data.cache;
-          write('profile', state.profile); write('meals', state.meals); write('burns', state.burns); write('cache', state.cache);
-          renderProfile(); renderMeals(); renderBurns(); renderEnergy(); alert('Импортировано');
-        } catch { alert('Ошибка импорта'); }
-      })
-    });
-  </script>
+        
+        // Modal Controls
+        function showFoodModal() {
+            document.getElementById('foodModal').classList.remove('hidden');
+        }
+        
+        function hideFoodModal() {
+            document.getElementById('foodModal').classList.add('hidden');
+        }
+        
+        function showWorkoutModal() {
+            document.getElementById('workoutModal').classList.remove('hidden');
+        }
+        
+        function hideWorkoutModal() {
+            document.getElementById('workoutModal').classList.add('hidden');
+        }
+        
+        // Progress Chart
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            const progressChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+                    datasets: [{
+                        label: 'Калории',
+                        data: [1800, 1950, 2100, 2000, 2200, 1900, 1850],
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                display: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        });
+        
+        // Telegram Web App Integration
+        if (window.Telegram && window.Telegram.WebApp) {
+            Telegram.WebApp.expand();
+            Telegram.WebApp.enableClosingConfirmation();
+            
+            // Set theme colors
+            const theme = Telegram.WebApp.colorScheme;
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+            
+            // Handle back button
+            Telegram.WebApp.BackButton.onClick(() => {
+                window.history.back();
+            });
+            
+            // Show back button when needed
+            Telegram.WebApp.onEvent('backButtonClicked', () => {
+                window.history.back();
+            });
+        }
+    </script>
 </body>
 </html>
